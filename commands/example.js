@@ -1,6 +1,12 @@
+/**
+ * @fileoverview Comando de ejemplo que sirve para orientar a los desarrolladores a la hora de crear otro comando.
+ * @author Reymundus<arceleandro@protonmail.com>
+ */
+
+
 const { Message, Client } = require("discord.js");
 const util = require("../utils/util");
-const sql = require("mysql").createConnection;
+const sql = require("mysql").createConnection();
 
 /**
  * Indica si el comando esta encendido o apagado.

@@ -2,7 +2,7 @@
 /**
  * Valida archivos con comandos.
  * @param {String[]} commands Lista con los comandos a validar.
- * @returns {Map} Lista con los comandos validos.
+ * @returns {Map<String, { on: Boolean, valid: Boolean, su: Boolean, version: String, run(message: Message, args: String[], client: Client, utils: util, database: Connection): Boolean }>} Lista con los comandos validos.
  */
 function commandValidator(commands) {
     let output = new Map();
@@ -23,8 +23,8 @@ function commandValidator(commands) {
 
 /**
  * Devuelve un Map en base a otro Map con la lista de comandos listo para usar en un console.table()
- * @param {Map} commands Map con los comandos.
- * @returns {Object} Devuelve una JSON deserealizado con todos los comandos listos para usar en un console.table()
+ * @param {Map<String, { on: Boolean, valid: Boolean, su: Boolean, version: String, run(message: Message, args: String[], client: Client, utils: util, database: Connection): Boolean }>} commands Map con los comandos.
+ * @returns {Array<{ COMANDO: String, ESTADO: String }>} Devuelve una JSON deserealizado con todos los comandos listos para usar en un console.table()
  */
 function commandTableGenerator(commands) {
     let output = [];

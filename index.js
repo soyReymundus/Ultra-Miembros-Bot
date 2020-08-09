@@ -9,8 +9,8 @@ process.on("uncaughtException", (exception) => {
     let currentError = new Reporter(exception);
     currentError.createReport(true);
 });
-/*
 
+/*
 ░█▀▄▀█ ░█──░█ ░█▀▀▀█ ░█▀▀█ ░█─── 
 ░█░█░█ ░█▄▄▄█ ─▀▀▀▄▄ ░█─░█ ░█─── 
 ░█──░█ ──░█── ░█▄▄▄█ ─▀▀█▄ ░█▄▄█
@@ -18,8 +18,8 @@ process.on("uncaughtException", (exception) => {
 const mysql = require('mysql');
 /*const DBconnection = mysql.createConnection({
     host: 'localhost',
-    user: 'me',
-    password: 'secret',
+    user: 'admin',
+    password: 'sq1fA)gq',
     database: 'UltraDB'
 });*/
 const DBconnection = mysql.createConnection({
@@ -53,7 +53,7 @@ const client = new Discord.Client({
 });
 /**
  * Lista de comandos que usara el bot.
- * @type {Map} Map con la lista de comandos.
+ * @type {Map<String, { on: Boolean, valid: Boolean, su: Boolean, version: String, run(message: Message, args: String[], client: Client, utils: util, database: DBconnection): Boolean }>} Map con la lista de comandos.
  */
 client.commands = util.commandValidator(fs.readdirSync("commands/"));
 /**
@@ -76,15 +76,23 @@ client.on("ready", () => {
 });
 
 client.on("message", (message) => {
+    /**
+     * Argumentos que utiliza el comando.
+     * @type {String[]}
+     */
     const args = message.content.slice(client.prefix.length).trim().split(/ +/g);
+    /**
+     * El comando. Esto sirve para utilizar como clave en algun MAP o de nombre de propiedad en un Object para obtener el comando.
+     */
     const command = args.shift().toLowerCase();
-    try {
 
-        /**
-         * Comando deserealizado y listo para usar en caso de ser valido.
-         */
-        const commandDeserialize = client.commands.get(command);
+    /**
+     * Comando deserealizado y listo para usar en caso de ser valido.
+     * @type {{ on: Boolean, valid: Boolean, su: Boolean, version: String, run(message: Message, args: String[], client: Client, utils: util, database: DBconnection): Boolean }}
+     */
+    const commandDeserialize = client.commands.get(command);
 
+    if (commandDeserialize != undefined) {
         if (commandDeserialize.on == true) {
             if (commandDeserialize.su == true) {
                 if (client.su.includes(message.author.id)) {
@@ -94,11 +102,8 @@ client.on("message", (message) => {
                 commandDeserialize.run(message, args, client, util, DBconnection);
             };
         };
+    };
 
-    } catch (e) { };
 });
-
-
-
 
 client.login("NzQwMDY3MTUyNTkzNDIwMzA4.XyjnPg.xzisSm4idQbGxOsfaeWebvh-ae4");

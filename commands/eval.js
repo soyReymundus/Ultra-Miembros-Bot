@@ -1,6 +1,12 @@
+/**
+ * @fileoverview Ejecuta codigo js de manera insegura desde el bot de discord. Solo superusuarios pueden usar este comando.
+ * @author Reymundus<arceleandro@protonmail.com>
+ */
+
+
 const { Message, Client } = require("discord.js");
 const util = require("../utils/util");
-const sql = require("mysql").createConnection;
+const sql = require("mysql").createConnection();
 
 /**
  * Indica si el comando esta encendido o apagado.
