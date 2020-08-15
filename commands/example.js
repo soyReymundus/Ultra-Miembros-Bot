@@ -6,7 +6,6 @@
 
 const { Message, Client } = require("discord.js");
 const util = require("../utils/util");
-const sql = require("mysql").createConnection();
 
 /**
  * Indica si el comando esta encendido o apagado.
@@ -36,7 +35,7 @@ module.exports.version = "v1";
  * @param {String[]} args Argumentos de el comando.
  * @param {Client} client Bot cliente que se esta usando.
  * @param {util} utils Funciones utiles.
- * @param {sql} database Base de datos que utiliza el bot.
+ * @param {Connection} database Base de datos que utiliza el bot.
  * @returns {Boolean} devuelve true si se ejecuto correctamente el comando.
  */
 module.exports.run = (message, args, client, utils, database) => {};

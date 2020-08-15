@@ -32,8 +32,8 @@ const DBconnection = mysql.createConnection({
 
 DBconnection.connect();
 
-DBconnection.query("CREATE TABLE IF NOT EXISTS listaUsuarios( historial TEXT, coins INT, id TEXT NOT NULL, icon TEXT NOT NULL, nombre TEXT NOT NULL )")
-DBconnection.query("CREATE TABLE IF NOT EXISTS listaPedidos( estado TEXT NOT NULL, ordenId INT NOT NULL, userId TEXT NOT NULL, serverId TEXT NOT NULL, prioridad INT NOT NULL, PRIMARY KEY (ordenId) )")
+DBconnection.query("CREATE TABLE IF NOT EXISTS listaUsuarios( historial TEXT, coins SMALLINT, id TEXT NOT NULL, icon TEXT NOT NULL, nombre TEXT NOT NULL )")
+DBconnection.query("CREATE TABLE IF NOT EXISTS listaPedidos( estado TEXT NOT NULL, ordenId INT NOT NULL, userId TEXT NOT NULL, serverId TEXT NOT NULL, prioridad TINYINT NOT NULL, total SMALLINT NOT NULL, contador SMALLINT, miembros TEXT, invitacion VARCHAR(16), mensaje VARCHAR(300), PRIMARY KEY (ordenId) )")
 
 DBconnection.on("error", (err) => {
     throw err;
@@ -68,11 +68,63 @@ client.prefix = "u!";
 client.su = ["656982590028513320", "522197129465167938"];
 
 client.on("ready", () => {
+    /**
+     * Usuario actual del bot
+     */
     let user = client.user;
+    //Escribe en la consola el usuario actual junto a su id
     console.log(`El bot inicio con el nombre de ${user.tag} y con la id ${user.id}`);
 
+    /**
+     * Objeto apto para motrarlo mediante un console table.
+     */
     let commandsTable = util.commandTableGenerator(client.commands);
+    //Muestra todos los comandos en consola.
     console.table(commandsTable);
+
+    /**
+     * Array con los estados que usara el bot.
+     * @type {String[]}
+     */
+    let estados = ["Escribe u!hola para empezar a usarme", "Unete al servidor de soporte discord.gg/FYcVCZN"];
+    /**
+     * Cuenta en que pocision del array de estados va.
+     * @type {Number}
+     */
+    let contador = 0;
+    /**
+     * Intervalo de tiempo que se espera entre cada cambio de estado
+     */
+    let intervalo = 300000;
+
+    //actualiza el estado del bot por primera vez para no esperar el interval.
+    client.user.setPresence({
+        status: "online",
+        activity: {
+            name: estados[contador],
+            type: "PLAYING"
+        }
+    });
+    //Sumamos 1 al contador para cuando se ejecute el interval
+    contador++;
+
+    setInterval(() => {
+        //Comprueba si el contador es mas grande que el array para restablecer el contador.
+        if (estados.length <= contador) {
+            contador = 0;
+        };
+        //actualiza el estado del bot.
+        client.user.setPresence({
+            status: "online",
+            activity: {
+                name: estados[contador],
+                type: "PLAYING"
+            }
+        });
+        //suma 1 al contador.
+        contador++;
+    }, intervalo);
+
 });
 
 client.on("message", (message) => {
@@ -106,4 +158,4 @@ client.on("message", (message) => {
 
 });
 
-client.login("NzQwMDY3MTUyNTkzNDIwMzA4.XyjnPg.xzisSm4idQbGxOsfaeWebvh-ae4");
+client.login("NzQwMDY3MTUyNTkzNDIwMzA4.XyjnPg.HSjso5XJHxBfnw_A4RdoOfroUVQ");

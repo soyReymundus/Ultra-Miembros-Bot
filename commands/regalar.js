@@ -6,7 +6,6 @@
 
 const { Message, Client } = require("discord.js");
 const util = require("../utils/util");
-const sql = require("mysql").createConnection();
 
 /**
  * Indica si el comando esta encendido o apagado.
@@ -36,7 +35,7 @@ module.exports.version = "v1";
  * @param {String[]} args Argumentos de el comando.
  * @param {Client} client Bot cliente que se esta usando.
  * @param {util} utils Funciones utiles.
- * @param {sql} database Base de datos que utiliza el bot.
+ * @param {Connection} database Base de datos que utiliza el bot.
  * @returns {Boolean} devuelve true si se ejecuto correctamente el comando.
  */
 module.exports.run = (message, args, client, utils, database) => {
@@ -46,8 +45,15 @@ module.exports.run = (message, args, client, utils, database) => {
         message.channel.send("Ingresa una cantidad valida.");
         return false;
     };
-    //verifica si es una id valida
-    if (typeof parseInt(args[1].replace("<@", "").replace(">", "").replace("!", "")) != "number") {
+    //dara error si no hay argumento 2 asi que se prevee eso
+    try {
+        //verifica si es una id valida
+        if (typeof parseInt(args[1].replace("<@", "").replace(">", "").replace("!", "")) != "number") {
+            message.channel.send("Ingresa una id valida.");
+            return false;
+        };
+    } catch{
+        //se ejecuta si no hay argumento 2
         message.channel.send("Ingresa una id valida.");
         return false;
     };
@@ -117,6 +123,10 @@ module.exports.run = (message, args, client, utils, database) => {
                 //se ejecuta si el usuario no existe.
                 message.channel.send("Ingresa una id valida.");
             });
-    } catch (err) { return false };
+    } catch (err) {
+        //Se ejecuta casa vez que ocurra un error
+        message.channel.send("ALGO SALIO MAL");
+        return false;
+    };
     return true;
 };
