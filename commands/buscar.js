@@ -1,6 +1,6 @@
 /**
  * @fileoverview Busca servidores que esten buscando miembros a cambio de unirte se te dara 1 coin
- * @author UltraMiembros<ultramiembros@gmail.com>
+ * @author Reymundus<arceleandro@protonmail.com>
  */
 
 
@@ -75,7 +75,7 @@ module.exports.run = (message, args, client, utils, database) => {
             //Ya que el usuario esta almenos en alguno de esos dos servidores, le buscamos algun servidor que necesite miembros que este en la base de datos.
             database.query(sql, (err, servidores) => {
 
-                //Si la base de datos dio mas de un servidor se elige uno randomy se guarda en esta variable.
+                //Si la base de datos dio mas de un servidor se elige uno random y se guarda en esta variable.
                 /**
                  * Servidor a enviar al usuario.
                  * @type {{ estado: String, ordenId: Number, userId: String, serverId: String, prioridad: Number, total: Number, contador: Number, miembros: String, invitacion: String, mensaje: String }}

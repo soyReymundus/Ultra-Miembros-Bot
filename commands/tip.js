@@ -1,6 +1,6 @@
 /**
  * @fileoverview Comando que envia consejos de como usar el bot de manera aleatoria
- * @author UltraMiembros<ultramiembros@gmail.com>
+ * @author Reymundus<arceleandro@protonmail.com>
  */
 
 

@@ -1,6 +1,6 @@
 /**
  * @fileoverview Comando hecho para que los usuarios puedan comprar miembros con los coins que tienen.
- * @author UltraMiembros<ultramiembros@gmail.com>
+ * @author Reymundus<arceleandro@protonmail.com>
  */
 
 

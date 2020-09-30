@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Archivo con funciones utiles que sirven para ahorrar lineas de codigo.
+ * @author Reymundus<arceleandro@protonmail.com>
+ */
 
 /**
  * Valida archivos con comandos.
@@ -29,33 +33,16 @@ function commandValidator(commands) {
 function commandTableGenerator(commands) {
     let output = [];
 
-    /**
-     * Un Iterator Con los nombres de los comandos.
-     */
-    let commandsIter = commands.keys();
-    /**
-     * Indica si seguir con el bucle o no hacerlo.
-     * @type {Boolean}
-     */
-    let loop = true;
-
-    while (loop) {
+    //pasa por todos los comandos
+    for (let [key, value] of commands) {
         /**
-         * Indica el nombre de el comando.
+         * Indica si el comando esta encendido o apagado
          * @type {String}
          */
-        let value = commandsIter.next().value;
-        if (value != undefined) {
-            /**
-             * Indica si el comando esta encendido o apagado
-             * @type {String}
-             */
-            let on = commands.get(value).on ? "ENCENDIDO" : "APAGADO";
+        let on = value.on ? "ENCENDIDO" : "APAGADO";
 
-            output.push({ "COMANDO": value, "ESTADO": on });
-        } else {
-            loop = false;
-        };
+        //los guarda en el otro Map para devolver.
+        output.push({ "COMANDO": key, "ESTADO": on });
     };
 
     return output;
@@ -73,11 +60,15 @@ function serverValidator(Servers) {
      */
     let valid = [];
 
-    if (Servers.length == 0) {
-        return valid;
-    } else {
+    //Comprueba si hay servidores para validar.
+    if (Servers.length != 0) {
+        //Pasa por toda la lista de servidores
         for (let index = 0; index < Servers.length; index++) {
+            /**
+             * Servidor actual por el que pasa el bucle.
+             */
             const element = Servers[index];
+            //Añade este servidor a la lista de validos solo con ciertas propiedades.
             valid.push({
                 "iconHash": element.icon,
                 "id": element.id,
@@ -85,8 +76,8 @@ function serverValidator(Servers) {
                 "ownerID": element.ownerID
             });
         };
-        return valid;
     };
+    return valid;
 };
 
 /**
@@ -231,7 +222,7 @@ function DATESQLGenerator(date, extraDays) {
 
 /**
  * Espera el tiempo indicado para cumplir la promesa.
- * Si se llama con un await sirve como un sleep() y detiene temporalmente la sincronia del codigo.
+ * Si se llama con un await sirve como un sleep() que detiene temporalmente la sincronia del codigo.
  * @param {Number} ms Tiempo de espera en milisegundos.
  * @returns {Promise<void>} Devuelve una promesa sin nada despues de esperar el tiemp indicado.
  */
@@ -240,7 +231,7 @@ function sleep(ms) {
 };
 
 /**
- * Lista de funciones utiles, ninguna de estar tendra contacto con la base de datos. Simplemente sirven para ahorrar lineas de codigo usando funciones ya hechas.
+ * Lista de funciones utiles, ninguna de estas tendra contacto directo con la base de datos. Simplemente sirven para ahorrar lineas de codigo usando funciones ya hechas.
  */
 module.exports = {
     commandValidator,

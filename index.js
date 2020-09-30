@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Archivo principal se encarga de hacer que el bot de discord funcione, conectarse a la base de datos y tiene un sistema de para reportar errores.
+ * @author Reymundus<arceleandro@protonmail.com>
+ */
+
 /*
 ░█▀▀█ ░█▀▀█ ─█▀▀█ ░█▀▀▀█ ░█─░█    ░█▀▀█ ░█▀▀▀ ░█▀▀█ ░█▀▀▀█ ░█▀▀█ ▀▀█▀▀ ░█▀▀▀ ░█▀▀█ 
 ░█─── ░█▄▄▀ ░█▄▄█ ─▀▀▀▄▄ ░█▀▀█ ▀▀ ░█▄▄▀ ░█▀▀▀ ░█▄▄█ ░█──░█ ░█▄▄▀ ─░█── ░█▀▀▀ ░█▄▄▀ 
@@ -16,17 +21,11 @@ process.on("uncaughtException", (exception) => {
 ░█──░█ ──░█── ░█▄▄▄█ ─▀▀█▄ ░█▄▄█
 */
 const mysql = require('mysql');
-/*const DBconnection = mysql.createConnection({
-    host: 'localhost',
-    user: 'adminBot',
-    password: 'sq1fA)gq',
-    database: 'UltraDB'
-});*/
 const DBconnection = mysql.createConnection({
-    host: '51.79.85.74',
+    host: '0.0.0.0',
     user: 'admin',
-    password: 'sq1fA)gq',
-    database: 'test',
+    password: 'admin',
+    database: 'UMiembros',
     insecureAuth: false
 });
 
@@ -47,7 +46,6 @@ DBconnection.on("error", (err) => {
 const fs = require("fs");
 const util = require("./utils/util");
 const Discord = require("discord.js");
-const { ESPIPE } = require("constants");
 const client = new Discord.Client({
     fetchAllMembers: true,
     messageCacheMaxSize: 1000,
@@ -74,7 +72,7 @@ client.prefix = "u!";
  * Lista de IDs de superusuarios dentro del bot.
  * @type {String[]}
  */
-client.su = ["656982590028513320", "522197129465167938"];
+client.su = ["Discord id"];
 /**
  * Lista con las invitaciones de los servidores donde esta el bot.
  * @type {{}}
@@ -213,9 +211,9 @@ client.on("guildMemberAdd", (member) => {
              */
             let invite = guildInvites.find(i => invites_Temp.get(i.code).uses < i.uses);
 
+            //si el sistema fallo y no se unio por ninguna invitacion hacemos un "return" asi no pasa por las condicionales.
             if (!invite) {
-                invite = {};
-                invite["code"] = "Invalido";
+                return;
             };
 
             if (invite.code == "bzseT3G" || invite.code == "ZnNmpHR") {
@@ -667,4 +665,4 @@ client.on("inviteDelete", (invite) => {
     DBconnection.query(`UPDATE listaPedidos SET estado='FINISH' WHERE invitacion='${invite.code}'`);
 });
 
-client.login("NzQwMDY3MTUyNTkzNDIwMzA4.XyjnPg.HSjso5XJHxBfnw_A4RdoOfroUVQ");
+client.login("Discord Bot Token");
