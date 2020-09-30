@@ -10,8 +10,12 @@
 */
 
 const Reporter = require("@toelf/crash-reporter");
+
+//Cuando se genere un error este evento se ejecutara.
 process.on("uncaughtException", (exception) => {
+    //se le envia el error como parametro en el constructor de esta clase.
     let currentError = new Reporter(exception);
+    //se crea el reporte de error en un archivo y se cierra la app.
     currentError.createReport(true);
 });
 
@@ -22,18 +26,21 @@ process.on("uncaughtException", (exception) => {
 */
 const mysql = require('mysql');
 const DBconnection = mysql.createConnection({
-    host: '0.0.0.0',
-    user: 'admin',
-    password: 'admin',
-    database: 'UMiembros',
-    insecureAuth: false
+    host: '0.0.0.0', //dirreccion ip donde se encuentra instalado mysql.
+    user: 'admin', //Usuario de mysql.
+    password: 'admin', //Contraseña de ese usuario
+    database: 'UMiembros', //Base de datos a usar.
+    insecureAuth: false //Para elegir si obtinir la entrada segura
 });
 
+//Se conecta a la base de datos
 DBconnection.connect();
 
+//Crea en caso de no existir dos tablas necesarias para el funcionamiento del bot.
 DBconnection.query("CREATE TABLE IF NOT EXISTS listaUsuarios( historial TEXT, coins SMALLINT, id TEXT NOT NULL, icon TEXT, nombre TEXT NOT NULL, proximaBusqueda DATE )");
 DBconnection.query("CREATE TABLE IF NOT EXISTS listaPedidos( estado TEXT NOT NULL, ordenId INT NOT NULL, userId TEXT NOT NULL, serverId TEXT NOT NULL, prioridad TINYINT NOT NULL, total SMALLINT NOT NULL, contador SMALLINT, miembros TEXT, invitacion VARCHAR(16), mensaje VARCHAR(300), vencimiento DATE, PRIMARY KEY (ordenId) )");
 
+//En caso de un error en alguna consulta sql se ejecuta este evento y por consecuencia produce un error en la app.
 DBconnection.on("error", (err) => {
     throw err;
 });
@@ -180,13 +187,19 @@ client.on("message", (message) => {
      */
     const commandDeserialize = client.commands.get(command);
 
+    //comprueba si el comando existe.
     if (commandDeserialize != undefined) {
+        //Comprueba si el comando esta encendido
         if (commandDeserialize.on == true) {
+            //comprueba si necesitas ser super usuario en el bot para usarlo.
             if (commandDeserialize.su == true) {
+                //verifica si la persona que ejecuta el comando tiene el poder para hacerlo
                 if (client.su.includes(message.author.id)) {
+                    //ejecuta el comando.
                     commandDeserialize.run(message, args, client, util, DBconnection);
                 };
             } else {
+                //ejecuta el comando en caso de que no se necesite superusario.
                 commandDeserialize.run(message, args, client, util, DBconnection);
             };
         };
