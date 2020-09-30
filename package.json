@@ -1,0 +1,34 @@
+{
+  "name": "ultra-miembros-bot",
+  "version": "1.0.0",
+  "description": "Un bot encargado de la compra y venta de miembros en servidores de discord.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "bot",
+    "discord"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toelf412/Ultra-Miembros-Bot.git"
+  },
+  "bugs": {
+    "email": "ultramiembros@gmail.com",
+    "url": "https://discord.gg/FYcVCZN"
+  },
+  "contributors": [
+    {
+      "name": "Damits",
+      "email": "Stxveh@gmail.com"
+    }
+  ],
+  "author": "Reymundus",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@toelf/crash-reporter": "^1.2.1",
+    "discord.js": "^12.2.0",
+    "mysql": "^2.18.1"
+  }
+}
