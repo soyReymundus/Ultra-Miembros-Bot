@@ -1,6 +1,6 @@
 /**
  * @fileoverview Envia un embed que sirve para que un usuario se inicialize con el bot.
- * @author UltraMiembros<ultramiembros@gmail.com>
+ * @author Reymundus<arceleandro@protonmail.com>
  */
 
 

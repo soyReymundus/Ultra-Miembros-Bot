@@ -1,6 +1,6 @@
 /**
  * @fileoverview Sirve para darle indicaciones al usuario de como usar el bot.
- * @author UltraMiembros<ultramiembros@gmail.com>
+ * @author Reymundus<arceleandro@protonmail.com>
  */
 
 
@@ -56,10 +56,11 @@ module.exports.run = (message, args, client, utils, database) => {
                 .addField("Paso 3", `Ahora pon **${client.prefix}buscar** para buscar servidores y unirte casa vez que te unas a un servidor se te dara 1 coin.`, true)
                 .addField("Consejo", `Usa el comando **${client.prefix}tip** para recibir un consejo aleatorio sobre como usar el bot.`, true)
                 .addField("¡COINS GRATIS!", `Unete a alguno de estos servidores para recibir coins gratis [XDevShop 💎](https://discord.gg/bzseT3G) y [Samurai](https://discord.gg/ZnNmpHR)`, true);
+
+            message.channel.send(embedData);
         } catch (e) {
             return false;
         };
-        message.channel.send(embedData);
         return true;
     } else {
         try {
@@ -75,10 +76,11 @@ module.exports.run = (message, args, client, utils, database) => {
                 .addField("Paso 4", `Ahora pon **${client.prefix}buscar** para buscar servidores y unirte casa vez que te unas a un servidor se te dara 1 coin.`, true)
                 .addField("Consejo", `Usa el comando **${client.prefix}tip** para recibir un consejo aleatorio sobre como usar el bot.`, false)
                 .addField("¡COINS GRATIS!", `Unete a alguno de estos servidores para recibir coins gratis [XDevShop 💎](https://discord.gg/bzseT3G) y [Samurai](https://discord.gg/ZnNmpHR)`, true);
+
+            message.channel.send(embedData);
         } catch (e) {
             return false;
         };
-        message.channel.send(embedData);
         return true;
     };
 };

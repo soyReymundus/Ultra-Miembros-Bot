@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Archivo principal se encarga de hacer que el bot de discord funcione, conectarse a la base de datos y tiene un sistema de para reportar errores.
+ * @author Reymundus<arceleandro@protonmail.com>
+ */
+
 /*
 ░█▀▀█ ░█▀▀█ ─█▀▀█ ░█▀▀▀█ ░█─░█    ░█▀▀█ ░█▀▀▀ ░█▀▀█ ░█▀▀▀█ ░█▀▀█ ▀▀█▀▀ ░█▀▀▀ ░█▀▀█ 
 ░█─── ░█▄▄▀ ░█▄▄█ ─▀▀▀▄▄ ░█▀▀█ ▀▀ ░█▄▄▀ ░█▀▀▀ ░█▄▄█ ░█──░█ ░█▄▄▀ ─░█── ░█▀▀▀ ░█▄▄▀ 
@@ -5,8 +10,12 @@
 */
 
 const Reporter = require("@toelf/crash-reporter");
+
+//Cuando se genere un error este evento se ejecutara.
 process.on("uncaughtException", (exception) => {
+    //se le envia el error como parametro en el constructor de esta clase.
     let currentError = new Reporter(exception);
+    //se crea el reporte de error en un archivo y se cierra la app.
     currentError.createReport(true);
 });
 
@@ -16,25 +25,22 @@ process.on("uncaughtException", (exception) => {
 ░█──░█ ──░█── ░█▄▄▄█ ─▀▀█▄ ░█▄▄█
 */
 const mysql = require('mysql');
-/*const DBconnection = mysql.createConnection({
-    host: 'localhost',
-    user: 'adminBot',
-    password: 'sq1fA)gq',
-    database: 'UltraDB'
-});*/
 const DBconnection = mysql.createConnection({
-    host: '51.79.85.74',
-    user: 'admin',
-    password: 'sq1fA)gq',
-    database: 'test',
-    insecureAuth: false
+    host: '0.0.0.0', //dirreccion ip donde se encuentra instalado mysql.
+    user: 'admin', //Usuario de mysql.
+    password: 'admin', //Contraseña de ese usuario
+    database: 'UMiembros', //Base de datos a usar.
+    insecureAuth: false //Para elegir si obtinir la entrada segura
 });
 
+//Se conecta a la base de datos
 DBconnection.connect();
 
+//Crea en caso de no existir dos tablas necesarias para el funcionamiento del bot.
 DBconnection.query("CREATE TABLE IF NOT EXISTS listaUsuarios( historial TEXT, coins SMALLINT, id TEXT NOT NULL, icon TEXT, nombre TEXT NOT NULL, proximaBusqueda DATE )");
 DBconnection.query("CREATE TABLE IF NOT EXISTS listaPedidos( estado TEXT NOT NULL, ordenId INT NOT NULL, userId TEXT NOT NULL, serverId TEXT NOT NULL, prioridad TINYINT NOT NULL, total SMALLINT NOT NULL, contador SMALLINT, miembros TEXT, invitacion VARCHAR(16), mensaje VARCHAR(300), vencimiento DATE, PRIMARY KEY (ordenId) )");
 
+//En caso de un error en alguna consulta sql se ejecuta este evento y por consecuencia produce un error en la app.
 DBconnection.on("error", (err) => {
     throw err;
 });
@@ -47,7 +53,6 @@ DBconnection.on("error", (err) => {
 const fs = require("fs");
 const util = require("./utils/util");
 const Discord = require("discord.js");
-const { ESPIPE } = require("constants");
 const client = new Discord.Client({
     fetchAllMembers: true,
     messageCacheMaxSize: 1000,
@@ -74,7 +79,7 @@ client.prefix = "u!";
  * Lista de IDs de superusuarios dentro del bot.
  * @type {String[]}
  */
-client.su = ["656982590028513320", "522197129465167938"];
+client.su = ["Discord id"];
 /**
  * Lista con las invitaciones de los servidores donde esta el bot.
  * @type {{}}
@@ -182,13 +187,19 @@ client.on("message", (message) => {
      */
     const commandDeserialize = client.commands.get(command);
 
+    //comprueba si el comando existe.
     if (commandDeserialize != undefined) {
+        //Comprueba si el comando esta encendido
         if (commandDeserialize.on == true) {
+            //comprueba si necesitas ser super usuario en el bot para usarlo.
             if (commandDeserialize.su == true) {
+                //verifica si la persona que ejecuta el comando tiene el poder para hacerlo
                 if (client.su.includes(message.author.id)) {
+                    //ejecuta el comando.
                     commandDeserialize.run(message, args, client, util, DBconnection);
                 };
             } else {
+                //ejecuta el comando en caso de que no se necesite superusario.
                 commandDeserialize.run(message, args, client, util, DBconnection);
             };
         };
@@ -213,9 +224,9 @@ client.on("guildMemberAdd", (member) => {
              */
             let invite = guildInvites.find(i => invites_Temp.get(i.code).uses < i.uses);
 
+            //si el sistema fallo y no se unio por ninguna invitacion hacemos un "return" asi no pasa por las condicionales.
             if (!invite) {
-                invite = {};
-                invite["code"] = "Invalido";
+                return;
             };
 
             if (invite.code == "bzseT3G" || invite.code == "ZnNmpHR") {
@@ -667,4 +678,4 @@ client.on("inviteDelete", (invite) => {
     DBconnection.query(`UPDATE listaPedidos SET estado='FINISH' WHERE invitacion='${invite.code}'`);
 });
 
-client.login("NzQwMDY3MTUyNTkzNDIwMzA4.XyjnPg.HSjso5XJHxBfnw_A4RdoOfroUVQ");
+client.login("Discord Bot Token");

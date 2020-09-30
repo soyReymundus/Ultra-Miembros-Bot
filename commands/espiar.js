@@ -1,6 +1,6 @@
 /**
  * @fileoverview Obtienes toda la informacion de una persona.
- * @author UltraMiembros<ultramiembros@gmail.com>
+ * @author Reymundus<arceleandro@protonmail.com>
  */
 
 const { Message, Client } = require("discord.js");

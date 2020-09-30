@@ -1,6 +1,6 @@
 /**
  * @fileoverview Regala coins a una persona. Solo superusuarios pueden usarlo.
- * @author UltraMiembros<ultramiembros@gmail.com>
+ * @author Reymundus<arceleandro@protonmail.com>
  */
 
 
@@ -70,7 +70,7 @@ module.exports.run = (message, args, client, utils, database) => {
                         "cantidad": amount,
                         "fecha": new Date().getTime(),
                         "referencia": "Regalo del super usuario " + message.author.tag,
-                        "DESDE": null,
+                        "DESDE": "CENTRAL",
                         "DESTINO": user.id
                     };
                     //Se comprueba si el usuario uso previamente el bot.
