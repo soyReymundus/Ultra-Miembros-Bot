@@ -230,11 +230,22 @@ function DATESQLGenerator(date, extraDays) {
 };
 
 /**
+ * Espera el tiempo indicado para cumplir la promesa.
+ * Si se llama con un await sirve como un sleep() y detiene temporalmente la sincronia del codigo.
+ * @param {Number} ms Tiempo de espera en milisegundos.
+ * @returns {Promise<void>} Devuelve una promesa sin nada despues de esperar el tiemp indicado.
+ */
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+/**
  * Lista de funciones utiles, ninguna de estar tendra contacto con la base de datos. Simplemente sirven para ahorrar lineas de codigo usando funciones ya hechas.
  */
 module.exports = {
     commandValidator,
     commandTableGenerator,
     serverValidator,
-    DATESQLGenerator
+    DATESQLGenerator,
+    sleep
 };

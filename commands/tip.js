@@ -75,6 +75,14 @@ module.exports.run = (message, args, client, utils, database) => {
         title: "!Nosotros sabemos lo que hacemos¡",
         description: "El bot es completamente funcional, por lo tanto quedate tranquilo.",
         color: "GREEN"
+    }, {
+        title: "!Cuidado¡",
+        description: "Si sacas al bot de tu servidor o le quitas permisos de administrador mientras compraste miembros perderas todos los coins usados.",
+        color: "RED"
+    }, {
+        title: "!Cuidado¡",
+        description: "Si eliminas la invitacion que el bot esta usando para obtener tus miembros cancelaras toda la operacion y perderas los coins gastados.",
+        color: "RED"
     }];
     try {
         /**

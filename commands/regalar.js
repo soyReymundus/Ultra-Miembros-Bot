@@ -99,7 +99,8 @@ module.exports.run = (message, args, client, utils, database) => {
                          */
                         let historial;
                         try {
-                            historial = JSON.parse(usuariosBusquedaNotArray["historial"]).push(HistorialFragmento);
+                            historial = JSON.parse(usuariosBusquedaNotArray["historial"]);
+                            historial.push(HistorialFragmento);
                         } catch (errorDeserialize) {
                             historial = [HistorialFragmento];
                         };
