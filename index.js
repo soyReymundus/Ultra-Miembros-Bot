@@ -229,7 +229,7 @@ client.on("guildMemberAdd", (member) => {
                 return;
             };
 
-            if (invite.code == "bzseT3G" || invite.code == "ZnNmpHR") {
+            if (invite.code == "invitacion a un servidor patrocinado") {
                 //Al usuario por unirse al servidor patrocinado se le agrega 2 coin extra.
                 DBconnection.query(`SELECT * FROM listaUsuarios WHERE id='${member.user.id}'`, (error, usuariosBusqueda) => {
                     /**
@@ -410,7 +410,7 @@ client.on("guildMemberAdd", (member) => {
 });
 
 client.on("guildMemberRemove", (member) => {
-    if (member.guild.id == "730299838863769630" || member.guild.id == "699850469086068819") {
+    if (member.guild.id == "id de un servidor patrocinado") {
         //Al usuario por irse del servidor patrocinado se le retira los 2 coins.
         DBconnection.query(`SELECT * FROM listaUsuarios WHERE id='${member.user.id}'`, (error, usuariosBusqueda) => {
             /**

@@ -51,8 +51,7 @@ module.exports.run = (message, args, client, utils, database) => {
                 .setColor("RANDOM")
                 .setFooter("U-Miebros no es legalmente una empresa", client.user.avatarURL())
                 .setDescription("Hola usted debe ser el dueño de este servidor. Yo soy U-Miembros soy un bot que se podra encargar de conseguirle miembros a su servidor. Aqui una lista de servidores especiales que ¡les dara 2 coins por unirse!")
-                .addField("XDevShop 💎", `[Haz click aqui](https://discord.gg/bzseT3G)`, true)
-                .addField("Samurai", `[Haz click aqui](https://discord.gg/ZnNmpHR)`, true);
+                .addField("Ejemplo", `[Haz click aqui](https://discord.gg/invitacion a un servidor patrocinado)`, true);
         } catch (e) {
             return false;
         };
@@ -66,8 +65,7 @@ module.exports.run = (message, args, client, utils, database) => {
                 .setFooter("U-Miebros no es legalmente una empresa", client.user.avatarURL())
                 .setDescription("Hola usted debe ser " + message.author.username + " lindo nombre. Soy U-Miembros un bot que se encargara de conseguirte miembros para tu discord, solo quiero avisar que ¡primero tienes que añadir a tu servidor!.")
                 .addField("¡PRIMERO!", `Debes añadirme a tu servidor para hacerlo [haz click aqui](https://discord.com/api/oauth2/authorize?client_id=${client.user.id}&permissions=8&scope=bot)`, true)
-                .addField("XDevShop 💎", `[Haz click aqui](https://discord.gg/bzseT3G)`, true)
-                .addField("Samurai", `[Haz click aqui](https://discord.gg/ZnNmpHR)`, true);
+                .addField("Ejemplo", `[Haz click aqui](https://discord.gg/invitacion a un servidor patrocinado)`, true);
         } catch (e) {
             return false;
         };

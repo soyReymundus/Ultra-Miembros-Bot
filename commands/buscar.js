@@ -49,14 +49,14 @@ module.exports.run = (message, args, client, utils, database) => {
         );
 
         //Usando el anterior Map se busca si el usuario se unio almenos a algunos de los dos servidores principales.
-        if (mutual_guilds.get("730299838863769630") == undefined && mutual_guilds.get("699850469086068819") == undefined) {
+        if (mutual_guilds.get("id de un servidor patrocinado") == undefined) {
             /**
              * Embed con los dos servidores principales.
              */
             const embed = new MessageEmbed()
                 .setColor("RED")
                 .setTitle("¡SERVIDORES ENCONTRADOS!")
-                .setDescription("Se encontraron 2 servidores donde podras obtener 2 coins de cada uno. [Samurai](https://discord.gg/ZnNmpHR) y [XDevShop 💎](https://discord.gg/bzseT3G) unete a esos dos interesantes servidores.")
+                .setDescription("Se encontraron un servidor donde podras obtener 2 coins. [Ejemplo server](https://discord.gg/invitacion a un servidor patrocinado) unete a este interesante servidor.")
             //Se envia el anterior embed debido a que no esta en ninguno de los dos servidores
             message.channel.send(embed);
             return true;

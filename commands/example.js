@@ -17,7 +17,7 @@ module.exports.on = true;
  * Indica si el comando esta listo para su uso o no esta listo.
  * @type {Boolean}
  */
-module.exports.valid = true;
+module.exports.valid = false;
 
 /**
  * Indica si se necesitan permisos de super usuario para usar el comando.
