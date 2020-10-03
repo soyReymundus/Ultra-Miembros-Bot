@@ -20,7 +20,7 @@
   },
   "contributors": [],
   "author": "Reymundus",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "dependencies": {
     "@toelf/crash-reporter": "^1.2.1",
     "discord.js": "^12.2.0",
