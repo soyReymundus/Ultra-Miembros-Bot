@@ -15,15 +15,10 @@
     "url": "https://github.com/toelf412/Ultra-Miembros-Bot.git"
   },
   "bugs": {
-    "email": "ultramiembros@gmail.com",
-    "url": "https://discord.gg/FYcVCZN"
+    "email": "arceleandro@protonmail.com",
+    "url": "https://github.com/toelf412/Ultra-Miembros-Bot/issues"
   },
-  "contributors": [
-    {
-      "name": "Damits",
-      "email": "Stxveh@gmail.com"
-    }
-  ],
+  "contributors": [],
   "author": "Reymundus",
   "license": "UNLICENSED",
   "dependencies": {
