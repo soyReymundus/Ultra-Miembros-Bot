@@ -7,13 +7,13 @@ Es un objeto que contiene un conjunto de funciones utiles el objetivo principal 
 **commandValidator(commands)**
 
 + commands [Array](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Array)<[String](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/String)> Lista con los nombres de los archivos de los comandos a validar.
-+ Returns: [Map](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Map)<[String](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/String), [command](Sin definir)>
++ Returns: [Map](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Map)<[String](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/String), [command](https://github.com/toelf412/Ultra-Miembros-Bot/blob/master/docs/comandos.md)>
 
 Devuelve un [Map](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Map) con los comandos listos para ser llamados.
 
 **commandTableGenerator(commands)**
 
-+ commands [Map](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Map)<[String](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/String), [command](Sin definir)>
++ commands [Map](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Map)<[String](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/String), [command](https://github.com/toelf412/Ultra-Miembros-Bot/blob/master/docs/comandos.md)>
 + Returns: [Array](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Array)<{COMANDO: [String](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/String), ESTADO: [String](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/String)}>
 
 Devuelve un [Array](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Array) con las lista de comandos lista para ser pasadas por un console.table() mostrando si el comando esta encendido o apagado.

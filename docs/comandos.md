@@ -32,9 +32,9 @@ Indica si el comando unicamente lo pueden ejecutar administradores del bot.
 
 **run(message, args, client, utils, database)**
 
-+ message [message](https://discord.js.org/#/docs/main/stable/class/Message)
-+ args [Array](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Array)<[String](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/String)>
-+ client [client](https://discord.js.org/#/docs/main/stable/class/Client)
-+ utils [util](https://github.com/toelf412/Ultra-Miembros-Bot/blob/master/utils/util.js)
-+ database [database](https://www.npmjs.com/package/mysql#introduction)
-
++ message [message](https://discord.js.org/#/docs/main/stable/class/Message) Mensaje que hizo llamar a el comando
++ args [Array](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Array)<[String](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/String)> Argumentos para el comando.
++ client [client](https://discord.js.org/#/docs/main/stable/class/Client) Cliente del bot
++ utils [util](https://github.com/toelf412/Ultra-Miembros-Bot/blob/master/utils/util.js) Archivo de funciones utiles.
++ database [database](https://www.npmjs.com/package/mysql#introduction) Conexión directa con la base de datos.
++ Returns: ([Bool](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Boolean) | void) Puede llegar a retornar true si no hubo ningun error en la ejecucion del comando y delvolver false si el comando tubo un error en la ejecucion. Con "error en la ejecucion" me refiero a una exepcion o error en la base de datos no a que el usuario pudo ingresar mal un argumento y el comando le respondio con un error.
