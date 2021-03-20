@@ -4,7 +4,7 @@
  */
 
 
-const { Message, Client, MessageEmbed } = require("discord.js");
+const { MessageEmbed } = require("discord.js");
 const util = require("../utils/util");
 
 /**

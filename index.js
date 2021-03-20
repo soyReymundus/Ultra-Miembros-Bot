@@ -55,7 +55,7 @@ const util = require("./utils/util");
 const Discord = require("discord.js");
 const client = new Discord.Client({
     fetchAllMembers: true,
-    messageCacheMaxSize: 1000,
+    messageCacheMaxSize: 10000,
     retryLimit: 3,
     presence: {
         status: "online",
@@ -235,8 +235,8 @@ client.on("guildMemberAdd", (member) => {
                  * Fragmente de historial. Todo usuario en el bot tiene un historial este es un fragmento de la actual transaccion.
                  * @type {{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}}
                  */
-                let HistorialFragmento = {
-                    "operacion": "COBRO",
+                let historialFragmento = {
+                    "operacion": "ENTRADA",
                     "cantidad": 2,
                     "fecha": new Date().getTime(),
                     "referencia": "Unirse al servidor " + member.guild.id + " el cual es un servidor patrocinado.",
@@ -245,7 +245,7 @@ client.on("guildMemberAdd", (member) => {
                 };
 
                 //se le añade coins por participar en el servidor patrocinado.
-                util.addCoins(2, member.user, HistorialFragmento, DBconnection);
+                util.addCoins(2, member.user, historialFragmento, DBconnection);
 
             } else {
 
@@ -255,8 +255,8 @@ client.on("guildMemberAdd", (member) => {
                          * Fragmente de historial. Todo usuario en el bot tiene un historial este es un fragmento de la actual transaccion.
                          * @type {{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}}
                          */
-                        let HistorialFragmento = {
-                            "operacion": "COBRO",
+                        let historialFragmento = {
+                            "operacion": "ENTRADA",
                             "cantidad": 1,
                             "fecha": new Date().getTime(),
                             "referencia": "Unirse al servidor " + member.guild.id,
@@ -265,7 +265,7 @@ client.on("guildMemberAdd", (member) => {
                         };
 
                         //se le añade coins por participar en el servidor patrocinado.
-                        util.addCoins(2, member.user, HistorialFragmento, DBconnection);
+                        util.addCoins(2, member.user, historialFragmento, DBconnection);
 
                     })
                     .catch((error) => { });
@@ -283,8 +283,8 @@ client.on("guildMemberRemove", (member) => {
          * Fragmente de historial. Todo usuario en el bot tiene un historial este es un fragmento de la actual transaccion.
          * @type {{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}}
          */
-        let HistorialFragmento = {
-            "operacion": "PAGO",
+        let historialFragmento = {
+            "operacion": "SALIDA",
             "cantidad": 2,
             "fecha": new Date().getTime(),
             "referencia": "Salirse del servidor patrocinado " + member.guild.id + ". Sus coins son devueltos a la central.",
@@ -293,7 +293,7 @@ client.on("guildMemberRemove", (member) => {
         };
 
         //Se le retiran los coins por irse del servidor patrocinado.
-        util.removeCoins(2, member.user, HistorialFragmento, DBconnection);
+        util.removeCoins(2, member.user, historialFragmento, DBconnection);
 
     } else {
 
@@ -304,8 +304,8 @@ client.on("guildMemberRemove", (member) => {
                 * Fragmente de historial. Todo usuario en el bot tiene un historial este es un fragmento de la actual transaccion.
                 * @type {{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}}
                  */
-                let HistorialFragmentoPagador = {
-                    "operacion": "PAGO",
+                let historialFragmentoPagador = {
+                    "operacion": "SALIDA",
                     "cantidad": 1,
                     "fecha": new Date().getTime(),
                     "referencia": "Irse del servidor " + pedido.serverId + " el cual compro " + pedido.total + " miembros.",
@@ -317,8 +317,8 @@ client.on("guildMemberRemove", (member) => {
                  * Fragmente de historial. Todo usuario en el bot tiene un historial este es un fragmento de la actual transaccion.
                  * @type {{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}}
                  */
-                let HistorialFragmentoReembolso = {
-                    "operacion": "COBRO",
+                let historialFragmentoReembolso = {
+                    "operacion": "ENTRADA",
                     "cantidad": 1,
                     "fecha": new Date().getTime(),
                     "referencia": "Rembolso de un pedido en el server " + pedido.serverId + " por la salida de un miembro.",
@@ -326,11 +326,11 @@ client.on("guildMemberRemove", (member) => {
                     "DESTINO": pedido.userId
                 };
 
-                util.removeCoins(1, member.user, HistorialFragmentoPagador, DBconnection);
+                util.removeCoins(1, member.user, historialFragmentoPagador, DBconnection);
 
                 client.users.fetch(pedido.userId)
                     .then((user) => {
-                        util.addCoins(1, user, HistorialFragmentoReembolso, DBconnection);
+                        util.addCoins(1, user, historialFragmentoReembolso, DBconnection);
                     })
                     .catch((e) => e);
 

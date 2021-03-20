@@ -3,10 +3,6 @@
  * @author Reymundus<arceleandro@protonmail.com>
  */
 
-
-const { Message, Client } = require("discord.js");
-const util = require("../utils/util");
-
 /**
  * Indica si el comando esta encendido o apagado.
  * @type {Boolean}
@@ -64,8 +60,8 @@ module.exports.run = (message, args, client, utils, database) => {
                  * Fragmente de historial. Todo usuario en el bot tiene un historial este es un fragmento de la actual transaccion.
                  * @type {{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}}
                 */
-                let HistorialFragmento = {
-                    "operacion": "COBRO",
+                let historialFragmento = {
+                    "operacion": "ENTRADA",
                     "cantidad": amount,
                     "fecha": new Date().getTime(),
                     "referencia": "Regalo del super usuario " + message.author.tag,
@@ -73,7 +69,7 @@ module.exports.run = (message, args, client, utils, database) => {
                     "DESTINO": user.id
                 };
 
-                utils.addCoins(amount, user, HistorialFragmento, database);
+                utils.addCoins(amount, user, historialFragmento, database);
 
                 //esto siempre se ejecutara
                 message.channel.send(`Se agrego ${coins} coins a el usuario ${user.id}`);

@@ -3,8 +3,6 @@
  * @author Reymundus<arceleandro@protonmail.com>
  */
 
-const { Message, GuildMember, User, Guild } = require("discord.js");
-
 /**
  * Valida archivos con comandos.
  * @param {String[]} commands Lista con los comandos a validar.
@@ -261,8 +259,8 @@ function createOrder(message, database, cantidadMiembros) {
          * Fragmento de historial. Todo usuario en el bot tiene un historial este es un fragmento de la actual transaccion.
          * @type {{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}}
          */
-        let HistorialFragmento = {
-            "operacion": "PAGO",
+        let historialFragmento = {
+            "operacion": "SALIDA",
             "cantidad": cantidadMiembros,
             "fecha": new Date().getTime(),
             "referencia": "Compra de miembros.",
@@ -298,9 +296,9 @@ function createOrder(message, database, cantidadMiembros) {
             let historial;
             try {
                 historial = JSON.parse(usuariosBusquedaNotArray["historial"]);
-                historial.push(HistorialFragmento);
+                historial.push(historialFragmento);
             } catch (errorDeserialize) {
-                historial = [HistorialFragmento];
+                historial = [historialFragmento];
             };
             /**
              * Datos a escapar para añadir y por consecuencia modificar la base de datos.
@@ -498,10 +496,10 @@ function removeUserOrder(user, server, database) {
  * Añade cierta cantidad de coins a un usuario en especifico.
  * @param {Number} coins Cantidad de coins a agregar.
  * @param {User} user Usuario a agregar los coins.
- * @param {{"operacion": String, "cantidad": Number, "fecha": Number, "referencia": String, "DESDE": String, "DESTINO": String}} HistorialFragmento Fragmento de historial que se incluira al usuario.
+ * @param {{"operacion": String, "cantidad": Number, "fecha": Number, "referencia": String, "DESDE": String, "DESTINO": String}} historialFragmento Fragmento de historial que se incluira al usuario.
  * @param {Connection} database Base de datos mysql donde se guardara la informacion.
 */
-function addCoins(coins, user, HistorialFragmento, database) {
+function addCoins(coins, user, historialFragmento, database) {
     database.query(`SELECT * FROM listaUsuarios WHERE id ='${user.id}'`, (errorDatabase, usuariosBusqueda) => {
 
         //Se comprueba si el usuario uso previamente el bot.
@@ -511,7 +509,7 @@ function addCoins(coins, user, HistorialFragmento, database) {
              * @type {{ historial: String, coins: Number, id: String, icon: String, nombre: String }}
              */
             let data = {
-                "historial": JSON.stringify([HistorialFragmento]),
+                "historial": JSON.stringify([historialFragmento]),
                 "coins": coins,
                 "id": user.id,
                 "icon": user.avatarURL(),
@@ -531,9 +529,9 @@ function addCoins(coins, user, HistorialFragmento, database) {
             let historial;
             try {
                 historial = JSON.parse(usuariosBusquedaNotArray["historial"]);
-                historial.push(HistorialFragmento);
+                historial.push(historialFragmento);
             } catch (errorDeserialize) {
-                historial = [HistorialFragmento];
+                historial = [historialFragmento];
             };
             /**
              * Datos a escapar para añadir y por consecuencia modificar la base de datos.
@@ -555,10 +553,10 @@ function addCoins(coins, user, HistorialFragmento, database) {
  * Si el usuario no existia se crea en la base de datos y se le asigna 0 coins y si existia se le retira los coins y puede tener coins negativos.
  * @param {Number} coins Cantidad de coins a retirar si es posible.
  * @param {User} user Usuario afectado.
- * @param {{"operacion": String, "cantidad": Number, "fecha": Number, "referencia": String, "DESDE": String, "DESTINO": String}} HistorialFragmento Fragmento de historial que se incluira al usuario si se le retiran los coins.
+ * @param {{"operacion": String, "cantidad": Number, "fecha": Number, "referencia": String, "DESDE": String, "DESTINO": String}} historialFragmento Fragmento de historial que se incluira al usuario si se le retiran los coins.
  * @param {Connection} database Base de datos mysql donde se guardara la informacion.
 */
-function removeCoins(coins, user, HistorialFragmento, database) {
+function removeCoins(coins, user, historialFragmento, database) {
     database.query(`SELECT * FROM listaUsuarios WHERE id ='${user.id}'`, (errorDatabase, usuariosBusqueda) => {
 
         //Se comprueba si el usuario uso previamente el bot.
@@ -588,9 +586,9 @@ function removeCoins(coins, user, HistorialFragmento, database) {
             let historial;
             try {
                 historial = JSON.parse(usuariosBusquedaNotArray["historial"]);
-                historial.push(HistorialFragmento);
+                historial.push(historialFragmento);
             } catch (errorDeserialize) {
-                historial = [HistorialFragmento];
+                historial = [historialFragmento];
             };
             /**
              * Datos a escapar para añadir y por consecuencia modificar la base de datos.
