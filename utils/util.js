@@ -3,6 +3,8 @@
  * @author Reymundus<arceleandro@protonmail.com>
  */
 
+const { Message, GuildMember, User } = require("discord.js");
+
 /**
  * Valida archivos con comandos.
  * @param {String[]} commands Lista con los comandos a validar.
@@ -231,6 +233,317 @@ function sleep(ms) {
 };
 
 /**
+ * Crea un pedido de miembros a base de un mensaje enviado por el usuario que quiere crearlo.
+ * @param {Message} message Mensaje que envio el usuario para crear su pedido.
+ * @param {Connection} database Base de datos MySQL que se usara para almacenar el pedido.
+ * @param {Number} cantidadMiembros Cantidad de miembros a comprar
+ */
+function createOrder(message, database, cantidadMiembros) {
+
+    /**
+    * Prioridad del pedido.
+    * @type {Number}
+    */
+    let prioridad = 1;
+
+    //se le asigna una prioridad segun la cantidad de miembros comprados.
+    if (cantidadMiembros >= 100) {
+        prioridad = 2;
+    } else if (cantidadMiembros >= 1000) {
+        prioridad = 3;
+    } else if (cantidadMiembros >= 10000) {
+        prioridad = 4;
+    };
+
+    //se obtiene el usuario que compro miembros
+    database.query(`SELECT * FROM listaUsuarios WHERE id='${message.author.id}'`, (error, usuariosBusqueda) => {
+        /**
+         * Fragmento de historial. Todo usuario en el bot tiene un historial este es un fragmento de la actual transaccion.
+         * @type {{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}}
+         */
+        let HistorialFragmento = {
+            "operacion": "PAGO",
+            "cantidad": cantidadMiembros,
+            "fecha": new Date().getTime(),
+            "referencia": "Compra de miembros.",
+            "DESDE": message.author.id,
+            "DESTINO": null
+        };
+        //Se comprueba si el usuario uso previamente el bot.
+        if (!usuariosBusqueda[0]) {
+            /**
+             * Datos a escapar para añadir a la base de datos.
+             * @type {{ historial: String, coins: Number, id: String, icon: String, nombre: String }}
+             */
+            let data = {
+                "historial": "[]",
+                "coins": 0,
+                "id": message.author.id,
+                "icon": message.author.avatarURL(),
+                "nombre": message.author.username
+            };
+            DBconnection.query("INSERT INTO listaUsuarios SET ?", data);
+            //se le informa al usuario que necesita coins para poder comprar miembros.
+            message.channel.send("No tienes coins suficientes.");
+        } else {
+            /**
+             * Datos comunmente de un usuario guardado en la base de datos.
+             * @type {{ historial: String, coins: Number, id: String, icon: String, nombre: String }}
+             */
+            let usuariosBusquedaNotArray = usuariosBusqueda[0];
+            /**
+            * Array con el historial de un usuario deserializado.
+            * @type {Array<{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}>}
+             */
+            let historial;
+            try {
+                historial = JSON.parse(usuariosBusquedaNotArray["historial"]);
+                historial.push(HistorialFragmento);
+            } catch (errorDeserialize) {
+                historial = [HistorialFragmento];
+            };
+            /**
+             * Datos a escapar para añadir y por consecuencia modificar la base de datos.
+             * @type {{ historial: String, coins: Number, icon: String, nombre: String }}
+             */
+            let data = {
+                "historial": JSON.stringify(historial),
+                "coins": usuariosBusquedaNotArray.coins - cantidadMiembros,
+                "icon": member.user.avatarURL(),
+                "nombre": member.user.username
+            };
+
+            //Se verifica si el usuario tiene esos coins
+            if (data.coins < 0) {
+                //se le informa al usuario que necesita coins para poder comprar miembros.
+                message.channel.send("No tienes coins suficientes.");
+            } else {
+                //se actualiza el usuario en la base de datos.
+                DBconnection.query(`UPDATE listaUsuarios SET ? WHERE id ="${member.user.id}"`, data);
+
+                //se obtiene el ordenId mas alto para poder crear el pedido.
+                database.query("SELECT MAX(ordenId) FROM listaPedidos", (errDb, max_ordenId_Array) => {
+                    /**
+                     * El ordenId mas alto en la base de datos.
+                     * @type {Number}
+                     */
+                    let db_ordenId = max_ordenId_Array[0]['MAX(ordenId)'];
+
+                    /**
+                     * El ordenId para este pedido.
+                     * @type {Number}
+                     */
+                    max_ordenId = db_ordenId + 1;
+
+                    //Se crea la invitacion para el pedido en un canal aleatorio.
+                    message.guild.channels.cache.random().createInvite({
+                        maxAge: 0,
+                        maxUses: 0,
+                        unique: true,
+                        reason: "Compra de miembros"
+                    })
+                        .then((invite) => {
+
+                            /**
+                             * Datos del pedido
+                             * @type {{ estado: String, ordenId: Number, userId: String, serverId: String, prioridad: Number, total: Number, contador: Number, miembros: String, invitacion: String, mensaje: String }}
+                             */
+                            let pedidoData = {
+                                estado: "IN PROCESS",
+                                ordenId: max_ordenId,
+                                userId: message.author.id,
+                                serverId: message.guild.id,
+                                prioridad: prioridad,
+                                total: cantidadMiembros,
+                                invitacion: invite.code,
+                                mensaje: mensajePedido
+                            };
+
+                            //se añade su pedido a la base de datos.
+                            database.query("INSERT INTO listaPedidos SET ?", pedidoData)
+                        })
+                        .catch((err) => {
+                            //en caso se fallar se le pide al usuario permiso de administrador para evitar errores futuros.
+                            message.channel.send("El bot debe tener permiso de administrador.")
+                        });
+                });
+            };
+        };
+    });
+};
+
+function updateOrder(user, inviteCode, database) {
+    //Se manda a la base de datos a buscar si hay pedidos que cumplan la condicion
+    DBconnection.query(`SELECT * FROM listaPedidos WHERE invitacion='${inviteCode}' AND estado='IN PROCESS'`, (error, pedidoArray) => {
+        /**
+         * Pedido donde el usuario participo.
+         * @type {{ estado: String, ordenId: Number, userId: String, serverId: String, prioridad: Number, total: Number, contador: Number, miembros: String, invitacion: String, mensaje: String }}
+         */
+        let pedido = pedidoArray[0];
+
+        //comprueba si hay pedido o no.
+        if (!pedido) { } else {
+
+            /**
+             * Lista de los miembros que participan en el pedido.
+             * @type {Array<String>}
+             */
+            let miembrosArray;
+
+            //Comprueba si existe el array con los miembros dentro del pedido.
+            if (!pedido.miembros) {
+                miembrosArray = [user.id];
+            } else {
+                try {
+                    //se intenta deserializar el array y guardar la id del actual miembro.
+                    miembrosArray = JSON.parse(pedido.miembros);
+                    miembrosArray.push(user.id);
+                } catch (err) {
+                    miembrosArray = [user.id];
+                };
+            };
+
+            /**
+             * El array con los miembros serializado.
+             * @type {String}
+             */
+            let miembrosArraySerializado = JSON.stringify(miembrosArray);
+            //Agarramos el contador y le sumamos 1
+            /**
+             * Variable que contiene el contador actual de miembros que participaron en el pedido.
+             * @type {Number}
+             */
+            let contador = pedido.contador + 1;
+            /**
+             * Limite de miembros que pueden participar en el pedido.
+             * @type {Number}
+             */
+            let total = pedido.total;
+
+            //se verifica si se llego a la cantidad de miembros limite. Si no llego solo se agrega el miembro actual al pedido.
+            if (total <= contador) {
+                database.query(`UPDATE listaPedidos SET miembros='${miembrosArraySerializado}', contador=${total}, vencimiento='${util.DATESQLGenerator(new Date(), 5)}', estado='RETENTION' WHERE ordenId=${pedido.ordenId}`);
+            } else {
+                database.query(`UPDATE listaPedidos SET miembros='${miembrosArraySerializado}', contador=${contador} WHERE ordenId=${pedido.ordenId}`);
+            };
+        };
+    });
+};
+
+/**
+ * Añade cierta cantidad de coins a un usuario en especifico.
+ * @param {Number} coins Cantidad de coins a agregar.
+ * @param {User} user Usuario a agregar los coins.
+ * @param {{"operacion": String, "cantidad": Number, "fecha": Number, "referencia": String, "DESDE": String, "DESTINO": String}} HistorialFragmento Fragmento de historial que se incluira al usuario.
+ * @param {Connection} database Base de datos mysql donde se guardara la informacion.
+*/
+function addCoins(coins, user, HistorialFragmento, database) {
+    database.query(`SELECT * FROM listaUsuarios WHERE id ='${user.id}'`, (errorDatabase, usuariosBusqueda) => {
+
+        //Se comprueba si el usuario uso previamente el bot.
+        if (!usuariosBusqueda[0]) {
+            /**
+             * Datos a escapar para añadir a la base de datos.
+             * @type {{ historial: String, coins: Number, id: String, icon: String, nombre: String }}
+             */
+            let data = {
+                "historial": JSON.stringify([HistorialFragmento]),
+                "coins": coins,
+                "id": user.id,
+                "icon": user.avatarURL(),
+                "nombre": user.username
+            };
+            database.query("INSERT INTO listaUsuarios SET ?", data);
+        } else {
+            /**
+             * Datos comunmente de un usuario guardado en la base de datos.
+             * @type {{ historial: String, coins: Number, id: String, icon: String, nombre: String }}
+             */
+            let usuariosBusquedaNotArray = usuariosBusqueda[0];
+            /**
+            * Array con el historial de un usuario deserializado.
+            * @type {Array<{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}>}
+             */
+            let historial;
+            try {
+                historial = JSON.parse(usuariosBusquedaNotArray["historial"]);
+                historial.push(HistorialFragmento);
+            } catch (errorDeserialize) {
+                historial = [HistorialFragmento];
+            };
+            /**
+             * Datos a escapar para añadir y por consecuencia modificar la base de datos.
+             * @type {{ historial: String, coins: Number, icon: String, nombre: String }}
+             */
+            let data = {
+                "historial": JSON.stringify(historial),
+                "coins": coins + usuariosBusquedaNotArray.coins,
+                "icon": user.avatarURL(),
+                "nombre": user.username
+            };
+            database.query(`UPDATE listaUsuarios WHERE id ='${user.id}' SET ?`, data);
+        };
+    });
+};
+
+/**
+ * Quita cierta cantidad de coins a un usuario en especifico. 
+ * Si el usuario no existia se crea en la base de datos y se le asigna 0 coins y si existia se le retira los coins y puede tener coins negativos.
+ * @param {Number} coins Cantidad de coins a retirar si es posible.
+ * @param {User} user Usuario afectado.
+ * @param {{"operacion": String, "cantidad": Number, "fecha": Number, "referencia": String, "DESDE": String, "DESTINO": String}} HistorialFragmento Fragmento de historial que se incluira al usuario si se le retiran los coins.
+ * @param {Connection} database Base de datos mysql donde se guardara la informacion.
+*/
+function removeCoins(coins, user, HistorialFragmento, database) {
+    database.query(`SELECT * FROM listaUsuarios WHERE id ='${user.id}'`, (errorDatabase, usuariosBusqueda) => {
+
+        //Se comprueba si el usuario uso previamente el bot.
+        if (!usuariosBusqueda[0]) {
+            /**
+             * Datos a escapar para añadir a la base de datos.
+             * @type {{ historial: String, coins: Number, id: String, icon: String, nombre: String }}
+             */
+            let data = {
+                "historial": "[]",
+                "coins": 0,
+                "id": user.id,
+                "icon": user.avatarURL(),
+                "nombre": user.username
+            };
+            database.query("INSERT INTO listaUsuarios SET ?", data);
+        } else {
+            /**
+             * Datos comunmente de un usuario guardado en la base de datos.
+             * @type {{ historial: String, coins: Number, id: String, icon: String, nombre: String }}
+             */
+            let usuariosBusquedaNotArray = usuariosBusqueda[0];
+            /**
+            * Array con el historial de un usuario deserializado.
+            * @type {Array<{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}>}
+             */
+            let historial;
+            try {
+                historial = JSON.parse(usuariosBusquedaNotArray["historial"]);
+                historial.push(HistorialFragmento);
+            } catch (errorDeserialize) {
+                historial = [HistorialFragmento];
+            };
+            /**
+             * Datos a escapar para añadir y por consecuencia modificar la base de datos.
+             * @type {{ historial: String, coins: Number, icon: String, nombre: String }}
+             */
+            let data = {
+                "historial": JSON.stringify(historial),
+                "coins": usuariosBusquedaNotArray.coins - coins,
+                "icon": user.avatarURL(),
+                "nombre": user.username
+            };
+            database.query(`UPDATE listaUsuarios WHERE id ='${user.id}' SET ?`, data);
+        };
+    });
+};
+
+/**
  * Lista de funciones utiles, ninguna de estas tendra contacto directo con la base de datos. Simplemente sirven para ahorrar lineas de codigo usando funciones ya hechas.
  */
 module.exports = {
@@ -238,5 +551,8 @@ module.exports = {
     commandTableGenerator,
     serverValidator,
     DATESQLGenerator,
-    sleep
+    sleep,
+    createOrder,
+    addCoins,
+    removeCoins
 };
