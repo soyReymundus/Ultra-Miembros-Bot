@@ -3,7 +3,7 @@
  * @author Reymundus<arceleandro@protonmail.com>
  */
 
-const { Message, GuildMember, User } = require("discord.js");
+const { Message, GuildMember, User, Guild } = require("discord.js");
 
 /**
  * Valida archivos con comandos.
@@ -282,7 +282,7 @@ function createOrder(message, database, cantidadMiembros) {
                 "icon": message.author.avatarURL(),
                 "nombre": message.author.username
             };
-            DBconnection.query("INSERT INTO listaUsuarios SET ?", data);
+            database.query("INSERT INTO listaUsuarios SET ?", data);
             //se le informa al usuario que necesita coins para poder comprar miembros.
             message.channel.send("No tienes coins suficientes.");
         } else {
@@ -319,7 +319,7 @@ function createOrder(message, database, cantidadMiembros) {
                 message.channel.send("No tienes coins suficientes.");
             } else {
                 //se actualiza el usuario en la base de datos.
-                DBconnection.query(`UPDATE listaUsuarios SET ? WHERE id ="${member.user.id}"`, data);
+                database.query(`UPDATE listaUsuarios SET ? WHERE id ="${member.user.id}"`, data);
 
                 //se obtiene el ordenId mas alto para poder crear el pedido.
                 database.query("SELECT MAX(ordenId) FROM listaPedidos", (errDb, max_ordenId_Array) => {
@@ -372,61 +372,125 @@ function createOrder(message, database, cantidadMiembros) {
     });
 };
 
-function updateOrder(user, inviteCode, database) {
-    //Se manda a la base de datos a buscar si hay pedidos que cumplan la condicion
-    DBconnection.query(`SELECT * FROM listaPedidos WHERE invitacion='${inviteCode}' AND estado='IN PROCESS'`, (error, pedidoArray) => {
-        /**
-         * Pedido donde el usuario participo.
-         * @type {{ estado: String, ordenId: Number, userId: String, serverId: String, prioridad: Number, total: Number, contador: Number, miembros: String, invitacion: String, mensaje: String }}
-         */
-        let pedido = pedidoArray[0];
-
-        //comprueba si hay pedido o no.
-        if (!pedido) { } else {
-
+/**
+ * Actualiza una orden en base a un miembro que supuestamente apoyo el pedido.
+ * @param {User} user Usuario que se unio al servidor entrando al pedido.
+ * @param {String} inviteCode Invitacion al servidor que se asocia un pedido. Si la invitacion so esta asociada a un pedido simplemente la funcion no hace nada.
+ * @param {Connection} database Base de datos mysql con las tablas a actualizar.
+ * @returns {Promise}
+ */
+function addUserOrder(user, inviteCode, database) {
+    return new Promise((resolve, reject) => {
+        //Se manda a la base de datos a buscar si hay pedidos que cumplan la condicion
+        database.query(`SELECT * FROM listaPedidos WHERE invitacion='${inviteCode}' AND estado='IN PROCESS'`, (error, pedidoArray) => {
             /**
-             * Lista de los miembros que participan en el pedido.
-             * @type {Array<String>}
+             * Pedido donde el usuario participo.
+             * @type {{ estado: String, ordenId: Number, userId: String, serverId: String, prioridad: Number, total: Number, contador: Number, miembros: String, invitacion: String, mensaje: String }}
              */
-            let miembrosArray;
+            let pedido = pedidoArray[0];
 
-            //Comprueba si existe el array con los miembros dentro del pedido.
-            if (!pedido.miembros) {
-                miembrosArray = [user.id];
+            //comprueba si hay pedido o no.
+            if (!pedido) {
+                reject("The order does not exist.");
             } else {
-                try {
-                    //se intenta deserializar el array y guardar la id del actual miembro.
-                    miembrosArray = JSON.parse(pedido.miembros);
-                    miembrosArray.push(user.id);
-                } catch (err) {
+
+                /**
+                 * Lista de los miembros que participan en el pedido.
+                 * @type {Array<String>}
+                 */
+                let miembrosArray;
+
+                //Comprueba si existe el array con los miembros dentro del pedido.
+                if (!pedido.miembros) {
                     miembrosArray = [user.id];
+                } else {
+                    try {
+                        //se intenta deserializar el array y guardar la id del actual miembro.
+                        miembrosArray = JSON.parse(pedido.miembros);
+                        miembrosArray.push(user.id);
+                    } catch (err) {
+                        miembrosArray = [user.id];
+                    };
                 };
+
+                /**
+                 * El array con los miembros serializado.
+                 * @type {String}
+                 */
+                let miembrosArraySerializado = JSON.stringify(miembrosArray);
+                //Agarramos el contador y le sumamos 1
+                /**
+                 * Variable que contiene el contador actual de miembros que participaron en el pedido.
+                 * @type {Number}
+                 */
+                let contador = pedido.contador + 1;
+                /**
+                 * Limite de miembros que pueden participar en el pedido.
+                 * @type {Number}
+                 */
+                let total = pedido.total;
+
+                //se verifica si se llego a la cantidad de miembros limite. Si no llego solo se agrega el miembro actual al pedido.
+                if (total <= contador) {
+                    database.query(`UPDATE listaPedidos SET miembros='${miembrosArraySerializado}', contador=${total}, vencimiento='${util.DATESQLGenerator(new Date(), 5)}', estado='RETENTION' WHERE ordenId=${pedido.ordenId}`);
+                } else {
+                    database.query(`UPDATE listaPedidos SET miembros='${miembrosArraySerializado}', contador=${contador} WHERE ordenId=${pedido.ordenId}`);
+                };
+                resolve(pedido);
             };
+        });
+    });
+};
 
+/**
+ * Verifica si un usuario participo en cierto pedido y lo remueve.
+ * @param {User} user Usuario a remover del pedido.
+ * @param {Guild} server Servidor donde se realizo el supuesto pedido.
+ * @param {Connection} database Base de datos mysql donde aplicar los cambios.
+ */
+function removeUserOrder(user, server, database) {
+    return new Promise((resolve, reject) => {
+        //Se manda a la base de datos a buscar si hay pedidos que cumplan la condicion
+        database.query(`SELECT * FROM listaPedidos WHERE serverId='${server.id}' AND (estado='RETENTION' OR estado='IN PROCESS') AND miembros LIKE '%${user.id}%'`, (error, pedidoArray) => {
             /**
-             * El array con los miembros serializado.
-             * @type {String}
+             * Pedido donde el usuario participo.
+             * @type {{ estado: String, ordenId: Number, userId: String, serverId: String, prioridad: Number, total: Number, contador: Number, miembros: String, invitacion: String, mensaje: String }}
              */
-            let miembrosArraySerializado = JSON.stringify(miembrosArray);
-            //Agarramos el contador y le sumamos 1
-            /**
-             * Variable que contiene el contador actual de miembros que participaron en el pedido.
-             * @type {Number}
-             */
-            let contador = pedido.contador + 1;
-            /**
-             * Limite de miembros que pueden participar en el pedido.
-             * @type {Number}
-             */
-            let total = pedido.total;
+            let pedido = pedidoArray[0];
 
-            //se verifica si se llego a la cantidad de miembros limite. Si no llego solo se agrega el miembro actual al pedido.
-            if (total <= contador) {
-                database.query(`UPDATE listaPedidos SET miembros='${miembrosArraySerializado}', contador=${total}, vencimiento='${util.DATESQLGenerator(new Date(), 5)}', estado='RETENTION' WHERE ordenId=${pedido.ordenId}`);
+            //comprueba si hay pedido o no.
+            if (!pedido) {
+                reject("The order does not exist.");
             } else {
-                database.query(`UPDATE listaPedidos SET miembros='${miembrosArraySerializado}', contador=${contador} WHERE ordenId=${pedido.ordenId}`);
+
+                /**
+                 * Lista de los miembros que participan en el pedido.
+                 * @type {Array<String>}
+                 */
+                let miembrosArray;
+
+                //Comprueba si existe el array con los miembros dentro del pedido.
+                if (!pedido.miembros) { } else {
+                    try {
+                        //se intenta deserializar el array y eliminar la id del actual miembro.
+                        miembrosArray = JSON.parse(pedido.miembros);
+                        miembrosArray.splice(miembrosArray.indexOf(user.id), 1);
+                    } catch (err) { };
+                };
+
+                /**
+                 * El array con los miembros serializado.
+                 * @type {String}
+                 */
+                let miembrosArraySerializado = JSON.stringify(miembrosArray);
+
+                //se actualiza el pedido en la base de datos.
+                database.query(`UPDATE listaPedidos SET miembros='${miembrosArraySerializado}' WHERE ordenId=${pedido.ordenId}`);
+            
+                resolve(pedido);
             };
-        };
+
+        });
     });
 };
 
@@ -553,6 +617,8 @@ module.exports = {
     DATESQLGenerator,
     sleep,
     createOrder,
+    addUserOrder,
+    removeUserOrder,
     addCoins,
     removeCoins
 };

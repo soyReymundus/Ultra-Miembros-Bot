@@ -230,178 +230,45 @@ client.on("guildMemberAdd", (member) => {
             };
 
             if (invite.code == "invitacion a un servidor patrocinado") {
-                //Al usuario por unirse al servidor patrocinado se le agrega 2 coin extra.
-                DBconnection.query(`SELECT * FROM listaUsuarios WHERE id='${member.user.id}'`, (error, usuariosBusqueda) => {
-                    /**
-                     * Fragmente de historial. Todo usuario en el bot tiene un historial este es un fragmento de la actual transaccion.
-                     * @type {{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}}
-                     */
-                    let HistorialFragmento = {
-                        "operacion": "COBRO",
-                        "cantidad": 2,
-                        "fecha": new Date().getTime(),
-                        "referencia": "Unirse al servidor " + member.guild.id + " el cual es un servidor patrocinado.",
-                        "DESDE": "CENTRAL",
-                        "DESTINO": member.user.id
-                    };
-                    //Se comprueba si el usuario uso previamente el bot.
-                    if (!usuariosBusqueda[0]) {
-                        /**
-                         * Datos a escapar para añadir a la base de datos.
-                         * @type {{ historial: String, coins: Number, id: String, icon: String, nombre: String }}
-                         */
-                        let data = {
-                            "historial": JSON.stringify([HistorialFragmento]),
-                            "coins": 2,
-                            "id": member.user.id,
-                            "icon": member.user.avatarURL(),
-                            "nombre": member.user.username
-                        };
-                        DBconnection.query("INSERT INTO listaUsuarios SET ?", data);
-                    } else {
-                        /**
-                         * Datos comunmente de un usuario guardado en la base de datos.
-                         * @type {{ historial: String, coins: Number, id: String, icon: String, nombre: String }}
-                         */
-                        let usuariosBusquedaNotArray = usuariosBusqueda[0];
-                        /**
-                        * Array con el historial de un usuario deserializado.
-                        * @type {Array<{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}>}
-                         */
-                        let historial;
-                        try {
-                            historial = JSON.parse(usuariosBusquedaNotArray["historial"]);
-                            historial.push(HistorialFragmento);
-                        } catch (errorDeserialize) {
-                            historial = [HistorialFragmento];
-                        };
-                        /**
-                         * Datos a escapar para añadir y por consecuencia modificar la base de datos.
-                         * @type {{ historial: String, coins: Number, icon: String, nombre: String }}
-                         */
-                        let data = {
-                            "historial": JSON.stringify(historial),
-                            "coins": 1 + usuariosBusquedaNotArray.coins,
-                            "icon": member.user.avatarURL(),
-                            "nombre": member.user.username
-                        };
-                        DBconnection.query(`UPDATE listaUsuarios SET ? WHERE id ='${member.user.id}'`, data);
-                    };
-                });
+
+                /**
+                 * Fragmente de historial. Todo usuario en el bot tiene un historial este es un fragmento de la actual transaccion.
+                 * @type {{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}}
+                 */
+                let HistorialFragmento = {
+                    "operacion": "COBRO",
+                    "cantidad": 2,
+                    "fecha": new Date().getTime(),
+                    "referencia": "Unirse al servidor " + member.guild.id + " el cual es un servidor patrocinado.",
+                    "DESDE": "CENTRAL",
+                    "DESTINO": member.user.id
+                };
+
+                //se le añade coins por participar en el servidor patrocinado.
+                util.addCoins(2, member.user, HistorialFragmento, DBconnection);
+
             } else {
-                //Se manda a la base de datos a buscar si hay pedidos que cumplan la condicion
-                DBconnection.query(`SELECT * FROM listaPedidos WHERE invitacion='${invite.code}' AND estado='IN PROCESS'`, (error, pedidoArray) => {
-                    /**
-                     * Pedido donde el usuario participo.
-                     * @type {{ estado: String, ordenId: Number, userId: String, serverId: String, prioridad: Number, total: Number, contador: Number, miembros: String, invitacion: String, mensaje: String }}
-                     */
-                    let pedido = pedidoArray[0];
 
-                    //comprueba si hay pedido o no.
-                    if (!pedido) { } else {
-
+                util.addUserOrder(member.user, invite.code, DBconnection)
+                    .then((pedido) => {
                         /**
-                         * Lista de los miembros que participan en el pedido.
-                         * @type {Array<String>}
+                         * Fragmente de historial. Todo usuario en el bot tiene un historial este es un fragmento de la actual transaccion.
+                         * @type {{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}}
                          */
-                        let miembrosArray;
-
-                        //Comprueba si existe el array con los miembros dentro del pedido.
-                        if (!pedido.miembros) {
-                            miembrosArray = [member.user.id];
-                        } else {
-                            try {
-                                //se intenta deserializar el array y guardar la id del actual miembro.
-                                miembrosArray = JSON.parse(pedido.miembros);
-                                miembrosArray.push(member.user.id);
-                            } catch (err) {
-                                miembrosArray = [member.user.id];
-                            };
+                        let HistorialFragmento = {
+                            "operacion": "COBRO",
+                            "cantidad": 1,
+                            "fecha": new Date().getTime(),
+                            "referencia": "Unirse al servidor " + member.guild.id,
+                            "DESDE": pedido.ordenId,
+                            "DESTINO": member.user.id
                         };
 
-                        /**
-                         * El array con los miembros serializado.
-                         * @type {String}
-                         */
-                        let miembrosArraySerializado = JSON.stringify(miembrosArray);
-                        //Agarramos el contador y le sumamos 1
-                        /**
-                         * Variable que contiene el contador actual de miembros que participaron en el pedido.
-                         * @type {Number}
-                         */
-                        let contador = pedido.contador + 1;
-                        /**
-                         * Limite de miembros que pueden participar en el pedido.
-                         * @type {Number}
-                         */
-                        let total = pedido.total;
+                        //se le añade coins por participar en el servidor patrocinado.
+                        util.addCoins(2, member.user, HistorialFragmento, DBconnection);
 
-                        //se verifica si se llego a la cantidad de miembros limite. Si no llego solo se agrega el miembro actual al pedido.
-                        if (total <= contador) {
-                            DBconnection.query(`UPDATE listaPedidos SET miembros='${miembrosArraySerializado}', contador=${total}, vencimiento='${util.DATESQLGenerator(new Date(), 5)}', estado='RETENTION' WHERE ordenId=${pedido.ordenId}`);
-                        } else {
-                            DBconnection.query(`UPDATE listaPedidos SET miembros='${miembrosArraySerializado}', contador=${contador} WHERE ordenId=${pedido.ordenId}`);
-                        };
-                        //Al usuario por participar en el pedido se le agrega 1 coin extra.
-                        DBconnection.query(`SELECT * FROM listaUsuarios WHERE id='${member.user.id}'`, (error, usuariosBusqueda) => {
-                            /**
-                             * Fragmente de historial. Todo usuario en el bot tiene un historial este es un fragmento de la actual transaccion.
-                             * @type {{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}}
-                             */
-                            let HistorialFragmento = {
-                                "operacion": "COBRO",
-                                "cantidad": 1,
-                                "fecha": new Date().getTime(),
-                                "referencia": "Unirse al servidor " + pedido.serverId + " el cual compro " + pedido.total + " miembros.",
-                                "DESDE": pedido.ordenId.toString(),
-                                "DESTINO": member.user.id
-                            };
-                            //Se comprueba si el usuario uso previamente el bot.
-                            if (!usuariosBusqueda[0]) {
-                                /**
-                                 * Datos a escapar para añadir a la base de datos.
-                                 * @type {{ historial: String, coins: Number, id: String, icon: String, nombre: String }}
-                                 */
-                                let data = {
-                                    "historial": JSON.stringify([HistorialFragmento]),
-                                    "coins": 1,
-                                    "id": member.user.id,
-                                    "icon": member.user.avatarURL(),
-                                    "nombre": member.user.username
-                                };
-                                DBconnection.query("INSERT INTO listaUsuarios SET ?", data);
-                            } else {
-                                /**
-                                 * Datos comunmente de un usuario guardado en la base de datos.
-                                 * @type {{ historial: String, coins: Number, id: String, icon: String, nombre: String }}
-                                 */
-                                let usuariosBusquedaNotArray = usuariosBusqueda[0];
-                                /**
-                                * Array con el historial de un usuario deserializado.
-                                * @type {Array<{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}>}
-                                 */
-                                let historial;
-                                try {
-                                    historial = JSON.parse(usuariosBusquedaNotArray["historial"]);
-                                    historial.push(HistorialFragmento);
-                                } catch (errorDeserialize) {
-                                    historial = [HistorialFragmento];
-                                };
-                                /**
-                                 * Datos a escapar para añadir y por consecuencia modificar la base de datos.
-                                 * @type {{ historial: String, coins: Number, icon: String, nombre: String }}
-                                 */
-                                let data = {
-                                    "historial": JSON.stringify(historial),
-                                    "coins": 1 + usuariosBusquedaNotArray.coins,
-                                    "icon": member.user.avatarURL(),
-                                    "nombre": member.user.username
-                                };
-                                DBconnection.query(`UPDATE listaUsuarios SET ? WHERE id ='${member.user.id}'`, data);
-                            };
-                        });
-                    };
-                });
+                    })
+                    .catch((error) => { });
             };
         })
         .catch((err) => {
@@ -411,205 +278,65 @@ client.on("guildMemberAdd", (member) => {
 
 client.on("guildMemberRemove", (member) => {
     if (member.guild.id == "id de un servidor patrocinado") {
-        //Al usuario por irse del servidor patrocinado se le retira los 2 coins.
-        DBconnection.query(`SELECT * FROM listaUsuarios WHERE id='${member.user.id}'`, (error, usuariosBusqueda) => {
-            /**
-             * Fragmente de historial. Todo usuario en el bot tiene un historial este es un fragmento de la actual transaccion.
-             * @type {{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}}
-             */
-            let HistorialFragmento = {
-                "operacion": "PAGO",
-                "cantidad": 2,
-                "fecha": new Date().getTime(),
-                "referencia": "Salirse del servidor patrocinado " + member.guild.id + ". Sus coins son devueltos a la central.",
-                "DESDE": member.user.id,
-                "DESTINO": "CENTRAL"
-            };
-            //Se comprueba si el usuario uso previamente el bot.
-            if (!usuariosBusqueda[0]) {
-                /**
-                 * Datos a escapar para añadir a la base de datos.
-                 * @type {{ historial: String, coins: Number, id: String, icon: String, nombre: String }}
-                 */
-                let data = {
-                    "historial": JSON.stringify([HistorialFragmento]),
-                    "coins": 0,
-                    "id": member.user.id,
-                    "icon": member.user.avatarURL(),
-                    "nombre": member.user.username
-                };
-                DBconnection.query("INSERT INTO listaUsuarios SET ?", data);
-            } else {
-                /**
-                 * Datos comunmente de un usuario guardado en la base de datos.
-                 * @type {{ historial: String, coins: Number, id: String, icon: String, nombre: String }}
-                 */
-                let usuariosBusquedaNotArray = usuariosBusqueda[0];
-                /**
-                * Array con el historial de un usuario deserializado.
-                * @type {Array<{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}>}
-                 */
-                let historial;
-                try {
-                    historial = JSON.parse(usuariosBusquedaNotArray["historial"]);
-                    historial.push(HistorialFragmento);
-                } catch (errorDeserialize) {
-                    historial = [HistorialFragmento];
-                };
-                /**
-                 * Datos a escapar para añadir y por consecuencia modificar la base de datos.
-                 * @type {{ historial: String, coins: Number, icon: String, nombre: String }}
-                 */
-                let data = {
-                    "historial": JSON.stringify(historial),
-                    "coins": usuariosBusquedaNotArray.coins - 2,
-                    "icon": member.user.avatarURL(),
-                    "nombre": member.user.username
-                };
-                DBconnection.query(`UPDATE listaUsuarios SET ? WHERE id ='${member.user.id}'`, data);
-            };
-        });
+
+        /**
+         * Fragmente de historial. Todo usuario en el bot tiene un historial este es un fragmento de la actual transaccion.
+         * @type {{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}}
+         */
+        let HistorialFragmento = {
+            "operacion": "PAGO",
+            "cantidad": 2,
+            "fecha": new Date().getTime(),
+            "referencia": "Salirse del servidor patrocinado " + member.guild.id + ". Sus coins son devueltos a la central.",
+            "DESDE": member.user.id,
+            "DESTINO": "CENTRAL"
+        };
+
+        //Se le retiran los coins por irse del servidor patrocinado.
+        util.removeCoins(2, member.user, HistorialFragmento, DBconnection);
+
     } else {
-        //Se manda a la base de datos a buscar si hay pedidos que cumplan la condicion
-        DBconnection.query(`SELECT * FROM listaPedidos WHERE serverId='${member.guild.id}' AND (estado='RETENTION' OR estado='IN PROCESS') AND miembros LIKE '%${member.user.id}%'`, (error, pedidoArray) => {
-            /**
-             * Pedido donde el usuario participo.
-             * @type {{ estado: String, ordenId: Number, userId: String, serverId: String, prioridad: Number, total: Number, contador: Number, miembros: String, invitacion: String, mensaje: String }}
-             */
-            let pedido = pedidoArray[0];
 
-            //comprueba si hay pedido o no.
-            if (!pedido) { } else {
+        util.removeUserOrder(member.user, member.guild, DBconnection)
+            .then((pedido) => {
 
                 /**
-                 * Lista de los miembros que participan en el pedido.
-                 * @type {Array<String>}
+                * Fragmente de historial. Todo usuario en el bot tiene un historial este es un fragmento de la actual transaccion.
+                * @type {{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}}
                  */
-                let miembrosArray;
-
-                //Comprueba si existe el array con los miembros dentro del pedido.
-                if (!pedido.miembros) { } else {
-                    try {
-                        //se intenta deserializar el array y eliminar la id del actual miembro.
-                        miembrosArray = JSON.parse(pedido.miembros);
-                        miembrosArray.splice(miembrosArray.indexOf(member.user.id), 1);
-                    } catch (err) { };
+                let HistorialFragmentoPagador = {
+                    "operacion": "PAGO",
+                    "cantidad": 1,
+                    "fecha": new Date().getTime(),
+                    "referencia": "Irse del servidor " + pedido.serverId + " el cual compro " + pedido.total + " miembros.",
+                    "DESDE": member.user.id,
+                    "DESTINO": pedido.userId
                 };
 
                 /**
-                 * El array con los miembros serializado.
-                 * @type {String}
+                 * Fragmente de historial. Todo usuario en el bot tiene un historial este es un fragmento de la actual transaccion.
+                 * @type {{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}}
                  */
-                let miembrosArraySerializado = JSON.stringify(miembrosArray);
+                let HistorialFragmentoReembolso = {
+                    "operacion": "COBRO",
+                    "cantidad": 1,
+                    "fecha": new Date().getTime(),
+                    "referencia": "Rembolso de un pedido en el server " + pedido.serverId + " por la salida de un miembro.",
+                    "DESDE": member.user.id,
+                    "DESTINO": pedido.userId
+                };
 
-                //se actualiza el pedido en la base de datos.
-                DBconnection.query(`UPDATE listaPedidos SET miembros='${miembrosArraySerializado}' WHERE ordenId=${pedido.ordenId}`);
+                util.removeCoins(1, member.user, HistorialFragmentoPagador, DBconnection);
 
-                //Al usuario por participar en el pedido se le quita 1 coin por irse.
-                DBconnection.query(`SELECT * FROM listaUsuarios WHERE id='${member.user.id}'`, (error, usuariosBusqueda) => {
-                    /**
-                     * Fragmente de historial. Todo usuario en el bot tiene un historial este es un fragmento de la actual transaccion.
-                     * @type {{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}}
-                     */
-                    let HistorialFragmento = {
-                        "operacion": "PAGO",
-                        "cantidad": 1,
-                        "fecha": new Date().getTime(),
-                        "referencia": "Irse del servidor " + pedido.serverId + " el cual compro " + pedido.total + " miembros.",
-                        "DESDE": member.user.id,
-                        "DESTINO": pedido.userId
-                    };
-                    //Se comprueba si el usuario uso previamente el bot.
-                    if (!usuariosBusqueda[0]) {
-                        /**
-                         * Datos a escapar para añadir a la base de datos.
-                         * @type {{ historial: String, coins: Number, id: String, icon: String, nombre: String }}
-                         */
-                        let data = {
-                            "historial": JSON.stringify([HistorialFragmento]),
-                            "coins": 0,
-                            "id": member.user.id,
-                            "icon": member.user.avatarURL(),
-                            "nombre": member.user.username
-                        };
-                        DBconnection.query("INSERT INTO listaUsuarios SET ?", data);
-                    } else {
-                        /**
-                         * Datos comunmente de un usuario guardado en la base de datos.
-                         * @type {{ historial: String, coins: Number, id: String, icon: String, nombre: String }}
-                         */
-                        let usuariosBusquedaNotArray = usuariosBusqueda[0];
-                        /**
-                        * Array con el historial de un usuario deserializado.
-                        * @type {Array<{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}>}
-                         */
-                        let historial;
-                        try {
-                            historial = JSON.parse(usuariosBusquedaNotArray["historial"]);
-                            historial.push(HistorialFragmento);
-                        } catch (errorDeserialize) {
-                            historial = [HistorialFragmento];
-                        };
-                        /**
-                         * Datos a escapar para añadir y por consecuencia modificar la base de datos.
-                         * @type {{ historial: String, coins: Number, icon: String, nombre: String }}
-                         */
-                        let data = {
-                            "historial": JSON.stringify(historial),
-                            "coins": usuariosBusquedaNotArray.coins - 1,
-                            "icon": member.user.avatarURL(),
-                            "nombre": member.user.username
-                        };
-                        DBconnection.query(`UPDATE listaUsuarios SET ? WHERE id ="${member.user.id}"`, data);
-                    };
-                });
+                client.users.fetch(pedido.userId)
+                    .then((user) => {
+                        util.addCoins(1, user, HistorialFragmentoReembolso, DBconnection);
+                    })
+                    .catch((e) => e);
 
-                //Al dueño del pedido se le rembolsa 1 coin
-                DBconnection.query(`SELECT * FROM listaUsuarios WHERE id='${pedido.userId}'`, (error, usuariosBusqueda) => {
-                    /**
-                     * Fragmente de historial. Todo usuario en el bot tiene un historial este es un fragmento de la actual transaccion.
-                     * @type {{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}}
-                     */
-                    let HistorialFragmento = {
-                        "operacion": "COBRO",
-                        "cantidad": 1,
-                        "fecha": new Date().getTime(),
-                        "referencia": "Rembolso de un pedido en el server " + pedido.serverId + " por la salida de un miembro.",
-                        "DESDE": member.user.id,
-                        "DESTINO": pedido.userId
-                    };
-                    //Se comprueba si el usuario uso previamente el bot.
-                    if (!usuariosBusqueda[0]) { } else {
-                        /**
-                         * Datos comunmente de un usuario guardado en la base de datos.
-                         * @type {{ historial: String, coins: Number, id: String, icon: String, nombre: String }}
-                         */
-                        let usuariosBusquedaNotArray = usuariosBusqueda[0];
-                        /**
-                        * Array con el historial de un usuario deserializado.
-                        * @type {Array<{operacion: String, cantidad: Number, fecha: Number, referencia: String, DESDE: String, DESTINO: String}>}
-                         */
-                        let historial;
-                        try {
-                            historial = JSON.parse(usuariosBusquedaNotArray["historial"]);
-                            historial.push(HistorialFragmento);
-                        } catch (errorDeserialize) {
-                            historial = [HistorialFragmento];
-                        };
-                        /**
-                         * Datos a escapar para añadir y por consecuencia modificar la base de datos.
-                         * @type {{ historial: String, coins: Number, icon: String, nombre: String }}
-                         */
-                        let data = {
-                            "historial": JSON.stringify(historial),
-                            "coins": 1 + usuariosBusquedaNotArray.coins
-                        };
-                        DBconnection.query(`UPDATE listaUsuarios SET ? WHERE id ='${pedido.userId}'`, data);
-                    };
-                });
-            };
+            })
+            .catch();
 
-        });
     };
 });
 
