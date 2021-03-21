@@ -3,9 +3,7 @@
  * @author Reymundus<arceleandro@protonmail.com>
  */
 
-
-const { Message, Client, MessageEmbed } = require("discord.js");
-const util = require("../utils/util");
+const { MessageEmbed } = require("discord.js");
 
 /**
  * Indica si el comando esta encendido o apagado.
@@ -56,7 +54,7 @@ module.exports.run = (message, args, client, utils, database) => {
             const embed = new MessageEmbed()
                 .setColor("RED")
                 .setTitle("¡SERVIDORES ENCONTRADOS!")
-                .setDescription("Se encontraron un servidor donde podras obtener 2 coins. [Ejemplo server](https://discord.gg/invitacion a un servidor patrocinado) unete a este interesante servidor.")
+                .setDescription("Se encontraron un servidor donde podras obtener 2 coins. [Ejemplo server](https://discord.gg/invitacionAUnServidorPatrocinado) unete a este interesante servidor.")
             //Se envia el anterior embed debido a que no esta en ninguno de los dos servidores
             message.channel.send(embed);
             return true;

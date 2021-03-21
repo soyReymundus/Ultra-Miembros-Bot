@@ -4,8 +4,7 @@
  */
 
 
-const { Message, Client, MessageEmbed } = require("discord.js");
-const util = require("../utils/util");
+const { MessageEmbed } = require("discord.js");
 
 /**
  * Indica si el comando esta encendido o apagado.

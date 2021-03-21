@@ -8,7 +8,7 @@ Por eso tome la dedición de hacer el código público porque mantener un bot de
 
 ## Consejos
 
-Con respecto al código a quien sea que lea esto no me molesta si lo modifican (aunque no tenga licencia) pueden siempre descargarse el código y modificarlo o usar la función Fork. Mi consejo  es que simplemente estén atentos a cómo funciona por dentro el bot (como registra los comandos, donde van las ids de los administradores del bot, que clase de datos se guardan en la base de datos) recomiendo ver los archivos útil.js y  example.js y la primera parte del index.js antes de empezar a modificarlo.
+Con respecto al código a quien sea que lea esto no me molesta si lo modifican (aunque no tenga licencia) pueden siempre descargarse el código y modificarlo o usar la función Fork. Mi consejo  es que simplemente estén atentos a cómo funciona por dentro el bot (como registra los comandos, donde van las ids de los administradores del bot, que clase de datos se guardan en la base de datos) recomiendo ver los archivos útil.js y example.js y la primera parte del index.js antes de empezar a modificarlo.
 
 Con respecto a poner el bot en funcionamiento yo quiero aclarar que no me hago responsable de lo que discord le haga a su cuenta. Hasta ahora lo único que se sabe es que no van a verificar bots de este tipo, eso es un obvio problema con el límite de 100 servidores e intentar hacer algo como enviar un formulario con datos falsos es muy peligroso igualmente si decides ignorar mi consejo o mágicamente discord retrocedió con su decisión respecto a los bots J4J aquí dejo las respuestas al formulario de verificación.
 

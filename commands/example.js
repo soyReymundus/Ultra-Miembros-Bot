@@ -3,15 +3,11 @@
  * @author Reymundus<arceleandro@protonmail.com>
  */
 
-
-const { Message, Client } = require("discord.js");
-const util = require("../utils/util");
-
 /**
  * Indica si el comando esta encendido o apagado.
  * @type {Boolean}
  */
-module.exports.on = true;
+module.exports.on = false;
 
 /**
  * Indica si el comando esta listo para su uso o no esta listo.
