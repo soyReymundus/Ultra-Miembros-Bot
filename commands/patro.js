@@ -3,7 +3,6 @@
  * @author Reymundus<arceleandro@protonmail.com>
  */
 
-
 const { MessageEmbed } = require("discord.js");
 
 /**

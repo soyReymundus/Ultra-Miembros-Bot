@@ -45,7 +45,7 @@ module.exports.run = (message, args, client, utils, database) => {
             message.channel.send("Ingresa una id valida.");
             return false;
         };
-    } catch{
+    } catch {
         //se ejecuta si no hay argumento 2
         message.channel.send("Ingresa una id valida.");
         return false;
@@ -78,8 +78,7 @@ module.exports.run = (message, args, client, utils, database) => {
                          * Servidores en comun con el usuario.
                          */
                         "mutual_guilds": client.guilds.cache.filter(g =>
-                            g.members.cache.filter(m => m.id === user.id).first().id === user.id
-                        ).toJSON()
+                            g.members.cache.filter(m => m.id === user.id)).toJSON()
                     };
                     /**
                      * Datos del usuario serializados

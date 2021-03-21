@@ -500,7 +500,7 @@ function removeUserOrder(user, server, database) {
  * @param {Connection} database Base de datos mysql donde se guardara la informacion.
 */
 function addCoins(coins, user, historialFragmento, database) {
-    database.query(`SELECT * FROM listaUsuarios WHERE id ='${user.id}'`, (errorDatabase, usuariosBusqueda) => {
+    database.query(`SELECT * FROM listaUsuarios WHERE id='${user.id}'`, (errorDatabase, usuariosBusqueda) => {
 
         //Se comprueba si el usuario uso previamente el bot.
         if (!usuariosBusqueda[0]) {
@@ -543,7 +543,7 @@ function addCoins(coins, user, historialFragmento, database) {
                 "icon": user.avatarURL(),
                 "nombre": user.username
             };
-            database.query(`UPDATE listaUsuarios WHERE id ='${user.id}' SET ?`, data);
+            database.query(`UPDATE listaUsuarios SET ? WHERE id='${user.id}'`, data);
         };
     });
 };

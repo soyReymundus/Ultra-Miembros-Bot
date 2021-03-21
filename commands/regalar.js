@@ -72,7 +72,7 @@ module.exports.run = (message, args, client, utils, database) => {
                 utils.addCoins(amount, user, historialFragmento, database);
 
                 //esto siempre se ejecutara
-                message.channel.send(`Se agrego ${coins} coins a el usuario ${user.id}`);
+                message.channel.send(`Se agrego ${amount} coins a el usuario <@${user.id}>`);
             })
             .catch((err) => {
                 //se ejecuta si el usuario no existe.

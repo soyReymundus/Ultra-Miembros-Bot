@@ -3,6 +3,8 @@
  * @author Reymundus<arceleandro@protonmail.com>
  */
 
+const { MessageEmbed } = require("discord.js");
+
 /**
  * Indica si el comando esta encendido o apagado.
  * @type {Boolean}
@@ -51,7 +53,7 @@ module.exports.run = (message, args, client, utils, database) => {
                 .addField("Paso 2", `Cada coin vale 1 miembro. Pon **${client.prefix}comprar 4** para comprar 4 miembros para tu servidor.`, true)
                 .addField("Paso 3", `Ahora pon **${client.prefix}buscar** para buscar servidores y unirte casa vez que te unas a un servidor se te dara 1 coin.`, true)
                 .addField("Consejo", `Usa el comando **${client.prefix}tip** para recibir un consejo aleatorio sobre como usar el bot.`, true)
-                .addField("¡COINS GRATIS!", `Unete a alguno de estos servidores para recibir coins gratis [Ejemplo server](https://discord.gg/invitacion a un servidor patrocinado)`, true);
+                .addField("¡COINS GRATIS!", `Unete a alguno de estos servidores para recibir coins gratis [Ejemplo server](https://discord.gg/invitacionAUnServidorPatrocinado)`, true);
 
             message.channel.send(embedData);
         } catch (e) {
