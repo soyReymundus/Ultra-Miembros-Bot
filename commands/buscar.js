@@ -3,9 +3,7 @@
  * @author Reymundus<arceleandro@protonmail.com>
  */
 
-
 const { MessageEmbed } = require("discord.js");
-const util = require("../utils/util");
 
 /**
  * Indica si el comando esta encendido o apagado.

@@ -25,7 +25,7 @@ process.on("uncaughtException", (exception) => {
 ░█──░█ ──░█── ░█▄▄▄█ ─▀▀█▄ ░█▄▄█
 */
 const mysql = require('mysql');
-const DBconnection = mysql.createConnection({
+const dbConnection = mysql.createConnection({
     host: '0.0.0.0', //dirreccion ip donde se encuentra instalado mysql.
     user: 'admin', //Usuario de mysql.
     password: 'admin', //Contraseña de ese usuario
@@ -34,14 +34,14 @@ const DBconnection = mysql.createConnection({
 });
 
 //Se conecta a la base de datos
-DBconnection.connect();
+dbConnection.connect();
 
 //Crea en caso de no existir dos tablas necesarias para el funcionamiento del bot.
-DBconnection.query("CREATE TABLE IF NOT EXISTS listaUsuarios( historial TEXT, coins SMALLINT, id TEXT NOT NULL, icon TEXT, nombre TEXT NOT NULL, proximaBusqueda DATE )");
-DBconnection.query("CREATE TABLE IF NOT EXISTS listaPedidos( estado TEXT NOT NULL, ordenId INT NOT NULL, userId TEXT NOT NULL, serverId TEXT NOT NULL, prioridad TINYINT NOT NULL, total SMALLINT NOT NULL, contador SMALLINT, miembros TEXT, invitacion VARCHAR(16), mensaje VARCHAR(300), vencimiento DATE, PRIMARY KEY (ordenId) )");
+dbConnection.query("CREATE TABLE IF NOT EXISTS listaUsuarios( historial TEXT, coins SMALLINT, id TEXT NOT NULL, icon TEXT, nombre TEXT NOT NULL, proximaBusqueda DATE )");
+dbConnection.query("CREATE TABLE IF NOT EXISTS listaPedidos( estado TEXT NOT NULL, ordenId INT NOT NULL, userId TEXT NOT NULL, serverId TEXT NOT NULL, prioridad TINYINT NOT NULL, total SMALLINT NOT NULL, contador SMALLINT, miembros TEXT, invitacion VARCHAR(16), mensaje VARCHAR(300), vencimiento DATE, PRIMARY KEY (ordenId) )");
 
 //En caso de un error en alguna consulta sql se ejecuta este evento y por consecuencia produce un error en la app.
-DBconnection.on("error", (err) => {
+dbConnection.on("error", (err) => {
     throw err;
 });
 
@@ -67,7 +67,7 @@ const client = new Discord.Client({
 });
 /**
  * Lista de comandos que usara el bot.
- * @type {Map<String, { on: Boolean, valid: Boolean, su: Boolean, version: String, run(message: Message, args: String[], client: Client, utils: util, database: DBconnection): Boolean }>} Map con la lista de comandos.
+ * @type {Map<String, { on: Boolean, valid: Boolean, su: Boolean, version: String, run(message: Message, args: String[], client: Client, utils: util, database: dbConnection): Boolean }>} Map con la lista de comandos.
  */
 client.commands = util.commandValidator(fs.readdirSync("commands/"));
 /**
@@ -150,7 +150,7 @@ client.on("ready", () => {
     //Comprueba cada 3 horas si hay un pedido en retencion que ya deba finalizar o si el bot pedio administrador en algun servidor.
     setInterval(async () => {
         //comprueba si ya acabo el estado de retencion de un pedido.
-        DBconnection.query(`UPDATE listaPedidos SET estado='FINISH' WHERE estado='RETENTION' AND vencimiento='${util.DATESQLGenerator(new Date())}'`);
+        dbConnection.query(`UPDATE listaPedidos SET estado='FINISH' WHERE estado='RETENTION' AND vencimiento='${util.DATESQLGenerator(new Date())}'`);
         //comprueba si perdio administrador de algun servidor.
         for (const [id, guild] of client.guilds.cache) {
             //se mira el miembro (este bot) en el servidor. No usando la cache.
@@ -160,7 +160,7 @@ client.on("ready", () => {
                     let admin = member.hasPermission("ADMINISTRATOR");
                     //Si no tiene permiso de admin se cancelan todos los pedidos
                     if (!admin) {
-                        DBconnection.query(`UPDATE listaPedidos SET estado='FINISH' WHERE serverId='${member.guild.id}'`);
+                        dbConnection.query(`UPDATE listaPedidos SET estado='FINISH' WHERE serverId='${member.guild.id}'`);
                     };
                 })
                 .catch((err) => { });
@@ -183,7 +183,7 @@ client.on("message", (message) => {
 
     /**
      * Comando deserealizado y listo para usar en caso de ser valido.
-     * @type {{ on: Boolean, valid: Boolean, su: Boolean, version: String, run(message: Message, args: String[], client: Client, utils: util, database: DBconnection): Boolean }}
+     * @type {{ on: Boolean, valid: Boolean, su: Boolean, version: String, run(message: Message, args: String[], client: Client, utils: util, database: dbConnection): Boolean }}
      */
     const commandDeserialize = client.commands.get(command);
 
@@ -196,11 +196,11 @@ client.on("message", (message) => {
                 //verifica si la persona que ejecuta el comando tiene el poder para hacerlo
                 if (client.su.includes(message.author.id)) {
                     //ejecuta el comando.
-                    commandDeserialize.run(message, args, client, util, DBconnection);
+                    commandDeserialize.run(message, args, client, util, dbConnection);
                 };
             } else {
                 //ejecuta el comando en caso de que no se necesite superusario.
-                commandDeserialize.run(message, args, client, util, DBconnection);
+                commandDeserialize.run(message, args, client, util, dbConnection);
             };
         };
     };
@@ -245,11 +245,11 @@ client.on("guildMemberAdd", (member) => {
                 };
 
                 //se le añade coins por participar en el servidor patrocinado.
-                util.addCoins(2, member.user, historialFragmento, DBconnection);
+                util.addCoins(2, member.user, historialFragmento, dbConnection);
 
             } else {
 
-                util.addUserOrder(member.user, invite.code, DBconnection)
+                util.addUserOrder(member.user, invite.code, dbConnection)
                     .then((pedido) => {
                         /**
                          * Fragmente de historial. Todo usuario en el bot tiene un historial este es un fragmento de la actual transaccion.
@@ -265,10 +265,10 @@ client.on("guildMemberAdd", (member) => {
                         };
 
                         //se le añade coins por participar en el servidor patrocinado.
-                        util.addCoins(2, member.user, historialFragmento, DBconnection);
+                        util.addCoins(2, member.user, historialFragmento, dbConnection);
 
                     })
-                    .catch((error) => { });
+                    .catch((err) => { });
             };
         })
         .catch((err) => {
@@ -293,11 +293,11 @@ client.on("guildMemberRemove", (member) => {
         };
 
         //Se le retiran los coins por irse del servidor patrocinado.
-        util.removeCoins(2, member.user, historialFragmento, DBconnection);
+        util.removeCoins(2, member.user, historialFragmento, dbConnection);
 
     } else {
 
-        util.removeUserOrder(member.user, member.guild, DBconnection)
+        util.removeUserOrder(member.user, member.guild, dbConnection)
             .then((pedido) => {
 
                 /**
@@ -326,16 +326,16 @@ client.on("guildMemberRemove", (member) => {
                     "DESTINO": pedido.userId
                 };
 
-                util.removeCoins(1, member.user, historialFragmentoPagador, DBconnection);
+                util.removeCoins(1, member.user, historialFragmentoPagador, dbConnection);
 
                 client.users.fetch(pedido.userId)
                     .then((user) => {
-                        util.addCoins(1, user, historialFragmentoReembolso, DBconnection);
+                        util.addCoins(1, user, historialFragmentoReembolso, dbConnection);
                     })
-                    .catch((e) => e);
+                    .catch((e) => { });
 
             })
-            .catch();
+            .catch((e) => { });
 
     };
 });
@@ -344,7 +344,7 @@ client.on("guildDelete", (guild) => {
     //Borro las invitaciones de ese servidor de cache.
     client.invites[guild.id] = null;
     //Finalizo todas las compras de ese server.
-    DBconnection.query(`UPDATE listaPedidos SET estado='FINISH' WHERE serverId='${guild.id}'`);
+    dbConnection.query(`UPDATE listaPedidos SET estado='FINISH' WHERE serverId='${guild.id}'`);
 });
 
 client.on("guildCreate", (guild) => {
@@ -402,7 +402,7 @@ client.on("inviteDelete", (invite) => {
     };
 
     //Finalizo los pedidos que se allan hecho con esa invite.
-    DBconnection.query(`UPDATE listaPedidos SET estado='FINISH' WHERE invitacion='${invite.code}'`);
+    dbConnection.query(`UPDATE listaPedidos SET estado='FINISH' WHERE invitacion='${invite.code}'`);
 });
 
 client.login("Discord Bot Token");
