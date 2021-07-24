@@ -3,6 +3,8 @@
  * @author Reymundus<arceleandro@protonmail.com>
  */
 
+const { MessageEmbed } = require("discord.js");
+
 /**
  * Indica si el comando esta encendido o apagado.
  * @type {Boolean}

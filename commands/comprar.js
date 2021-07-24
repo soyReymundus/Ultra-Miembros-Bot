@@ -64,6 +64,12 @@ module.exports.run = (message, args, client, utils, database) => {
     if (mensajePedido.length > 300) mensajePedido = "Join my server pls";
     if (mensajePedido.length == 0) mensajePedido = "Join my server pls";
 
+    //se verifica si se el mensaje se envio desde el canal de un servidor.
+    if(!message.guild) {
+        message.channel.send("Debes escribir este comando en un servidor!");
+        return true;
+    };
+
     //se verifica si el numbero de miembros en realidad es un numero.
     if (isNaN(cantidadMiembros)) {
         message.channel.send("Ingresa la cantidad a comprar.");
@@ -76,6 +82,6 @@ module.exports.run = (message, args, client, utils, database) => {
         return true;
     };
 
-    utils.createOrder(message, database, cantidadMiembros);
+    utils.createOrder(message, database, cantidadMiembros, mensajePedido);
 
 };

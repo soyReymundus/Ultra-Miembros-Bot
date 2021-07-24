@@ -105,7 +105,7 @@ client.on("ready", () => {
      * Array con los estados que usara el bot.
      * @type {String[]}
      */
-    let estados = ["Unete al servidor de soporte discord.gg/FYcVCZN", "Escribe u!hola para empezar a usarme"];
+    let estados = ["Unete al servidor de soporte discord.gg/CODIGO DE INVITACION", "Escribe u!hola para empezar a usarme"];
     /**
      * Cuenta en que pocision del array de estados va.
      * @type {Number}
@@ -171,15 +171,19 @@ client.on("ready", () => {
 });
 
 client.on("message", (message) => {
+
+    //se verifica si el mensaje comienza por el prefijo.
+    if (!message.content.startsWith(client.prefix)) return;
+
     /**
      * Argumentos que utiliza el comando.
      * @type {String[]}
      */
-    const args = message.content.slice(client.prefix.length).trim().split(/ +/g);
+    const args = message.content.trim().split(/ +/g);
     /**
      * El comando. Esto sirve para utilizar como clave en algun MAP o de nombre de propiedad en un Object para obtener el comando.
      */
-    const command = args.shift().toLowerCase();
+    const command = args.shift().slice(client.prefix.length).toLowerCase();
 
     /**
      * Comando deserealizado y listo para usar en caso de ser valido.
@@ -224,7 +228,7 @@ client.on("guildMemberAdd", (member) => {
              */
             let invite = guildInvites.find(i => invites_Temp.get(i.code).uses < i.uses);
 
-            //si el sistema fallo y no se unio por ninguna invitacion hacemos un "return" asi no pasa por las condicionales.
+            //si el sistema fallo y/o no se unio por ninguna invitacion hacemos un "return" asi no pasa por las condicionales.
             if (!invite) {
                 return;
             };
