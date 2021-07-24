@@ -42,8 +42,7 @@ module.exports.run = (message, args, client, utils, database) => {
         /**
          * Hace un Map con los servidores en comun que se tiene con el usuario.
          */
-        let mutual_guilds = client.guilds.cache.filter(g =>
-            g.members.cache.filter(m => m.id === author.id));
+        let mutual_guilds = client.guilds.cache.filter(g => g.member(author));
 
         //Usando el anterior Map se busca si el usuario se unio almenos a algunos de los dos servidores principales.
         if (mutual_guilds.get("id de un servidor patrocinado") == undefined) {

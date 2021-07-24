@@ -171,15 +171,19 @@ client.on("ready", () => {
 });
 
 client.on("message", (message) => {
+
+    //se verifica si el mensaje comienza por el prefijo.
+    if (!message.content.startsWith(client.prefix)) return;
+
     /**
      * Argumentos que utiliza el comando.
      * @type {String[]}
      */
-    const args = message.content.slice(client.prefix.length).trim().split(/ +/g);
+    const args = message.content.trim().split(/ +/g);
     /**
      * El comando. Esto sirve para utilizar como clave en algun MAP o de nombre de propiedad en un Object para obtener el comando.
      */
-    const command = args.shift().toLowerCase();
+    const command = args.shift().slice(client.prefix.length).toLowerCase();
 
     /**
      * Comando deserealizado y listo para usar en caso de ser valido.

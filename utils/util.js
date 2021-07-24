@@ -235,8 +235,16 @@ function sleep(ms) {
  * @param {Message} message Mensaje que envio el usuario para crear su pedido.
  * @param {Connection} database Base de datos MySQL que se usara para almacenar el pedido.
  * @param {Number} cantidadMiembros Cantidad de miembros a comprar
+ * @param {String} mensajePedido El mensaje que usa el usuario para promocionar su servidor.
  */
-function createOrder(message, database, cantidadMiembros) {
+function createOrder(message, database, cantidadMiembros, mensajePedido) {
+
+
+    /**
+     * La url del avatar del usuario. Sera null si no tiene un avatar.
+     * @type {String?}
+     */
+    let avatar = message.author.avatarURL() ? message.author.avatarURL() : null;
 
     /**
     * Prioridad del pedido.
@@ -277,7 +285,7 @@ function createOrder(message, database, cantidadMiembros) {
                 "historial": "[]",
                 "coins": 0,
                 "id": message.author.id,
-                "icon": message.author.avatarURL(),
+                "icon": avatar,
                 "nombre": message.author.username
             };
             database.query("INSERT INTO listaUsuarios SET ?", data);
@@ -307,8 +315,8 @@ function createOrder(message, database, cantidadMiembros) {
             let data = {
                 "historial": JSON.stringify(historial),
                 "coins": usuariosBusquedaNotArray.coins - cantidadMiembros,
-                "icon": member.user.avatarURL(),
-                "nombre": member.user.username
+                "icon": avatar,
+                "nombre": message.author.username
             };
 
             //Se verifica si el usuario tiene esos coins
@@ -316,8 +324,6 @@ function createOrder(message, database, cantidadMiembros) {
                 //se le informa al usuario que necesita coins para poder comprar miembros.
                 message.channel.send("No tienes coins suficientes.");
             } else {
-                //se actualiza el usuario en la base de datos.
-                database.query(`UPDATE listaUsuarios SET ? WHERE id ="${member.user.id}"`, data);
 
                 //se obtiene el ordenId mas alto para poder crear el pedido.
                 database.query("SELECT MAX(ordenId) FROM listaPedidos", (errDb, max_ordenId_Array) => {
@@ -333,8 +339,8 @@ function createOrder(message, database, cantidadMiembros) {
                      */
                     max_ordenId = db_ordenId + 1;
 
-                    //Se crea la invitacion para el pedido en un canal aleatorio.
-                    message.guild.channels.cache.random().createInvite({
+                    //Se crea la invitacion para el pedido en el canal donde se envio el mensaje.
+                    message.channel.createInvite({
                         maxAge: 0,
                         maxUses: 0,
                         unique: true,
@@ -357,8 +363,13 @@ function createOrder(message, database, cantidadMiembros) {
                                 mensaje: mensajePedido
                             };
 
+                            //se actualiza el usuario en la base de datos.
+                            database.query(`UPDATE listaUsuarios SET ? WHERE id ="${message.author.id}"`, data);
+
                             //se añade su pedido a la base de datos.
                             database.query("INSERT INTO listaPedidos SET ?", pedidoData)
+
+                            message.channel.send("Su compra se realizo con exito :D");
                         })
                         .catch((err) => {
                             //en caso se fallar se le pide al usuario permiso de administrador para evitar errores futuros.
@@ -430,7 +441,7 @@ function addUserOrder(user, inviteCode, database) {
 
                 //se verifica si se llego a la cantidad de miembros limite. Si no llego solo se agrega el miembro actual al pedido.
                 if (total <= contador) {
-                    database.query(`UPDATE listaPedidos SET miembros='${miembrosArraySerializado}', contador=${total}, vencimiento='${util.DATESQLGenerator(new Date(), 5)}', estado='RETENTION' WHERE ordenId=${pedido.ordenId}`);
+                    database.query(`UPDATE listaPedidos SET miembros='${miembrosArraySerializado}', contador=${total}, vencimiento='${DATESQLGenerator(new Date(), 5)}', estado='RETENTION' WHERE ordenId=${pedido.ordenId}`);
                 } else {
                     database.query(`UPDATE listaPedidos SET miembros='${miembrosArraySerializado}', contador=${contador} WHERE ordenId=${pedido.ordenId}`);
                 };
@@ -500,6 +511,13 @@ function removeUserOrder(user, server, database) {
  * @param {Connection} database Base de datos mysql donde se guardara la informacion.
 */
 function addCoins(coins, user, historialFragmento, database) {
+
+    /**
+     * La url del avatar del usuario. Sera null si no tiene un avatar.
+     * @type {String?}
+     */
+    let avatar = user.avatarURL() ? user.avatarURL() : null;
+
     database.query(`SELECT * FROM listaUsuarios WHERE id='${user.id}'`, (errorDatabase, usuariosBusqueda) => {
 
         //Se comprueba si el usuario uso previamente el bot.
@@ -512,7 +530,7 @@ function addCoins(coins, user, historialFragmento, database) {
                 "historial": JSON.stringify([historialFragmento]),
                 "coins": coins,
                 "id": user.id,
-                "icon": user.avatarURL(),
+                "icon": avatar,
                 "nombre": user.username
             };
             database.query("INSERT INTO listaUsuarios SET ?", data);
@@ -540,7 +558,7 @@ function addCoins(coins, user, historialFragmento, database) {
             let data = {
                 "historial": JSON.stringify(historial),
                 "coins": coins + usuariosBusquedaNotArray.coins,
-                "icon": user.avatarURL(),
+                "icon": avatar,
                 "nombre": user.username
             };
             database.query(`UPDATE listaUsuarios SET ? WHERE id='${user.id}'`, data);
@@ -557,6 +575,13 @@ function addCoins(coins, user, historialFragmento, database) {
  * @param {Connection} database Base de datos mysql donde se guardara la informacion.
 */
 function removeCoins(coins, user, historialFragmento, database) {
+
+    /**
+     * La url del avatar del usuario. Sera null si no tiene un avatar.
+     * @type {String?}
+     */
+    let avatar = user.avatarURL() ? user.avatarURL() : null;
+
     database.query(`SELECT * FROM listaUsuarios WHERE id ='${user.id}'`, (errorDatabase, usuariosBusqueda) => {
 
         //Se comprueba si el usuario uso previamente el bot.
@@ -569,7 +594,7 @@ function removeCoins(coins, user, historialFragmento, database) {
                 "historial": "[]",
                 "coins": 0,
                 "id": user.id,
-                "icon": user.avatarURL(),
+                "icon": avatar,
                 "nombre": user.username
             };
             database.query("INSERT INTO listaUsuarios SET ?", data);
@@ -597,10 +622,10 @@ function removeCoins(coins, user, historialFragmento, database) {
             let data = {
                 "historial": JSON.stringify(historial),
                 "coins": usuariosBusquedaNotArray.coins - coins,
-                "icon": user.avatarURL(),
+                "icon": avatar,
                 "nombre": user.username
             };
-            database.query(`UPDATE listaUsuarios WHERE id ='${user.id}' SET ?`, data);
+            database.query(`UPDATE listaUsuarios SET ? WHERE id ='${user.id}'`, data);
         };
     });
 };
