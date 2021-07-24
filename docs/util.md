@@ -40,3 +40,44 @@ Tambien le puedes añadir dias extras por ejemplo si estamos en el dia 30/08/202
 + Returns: [Promise](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Promise)<void>
 
 Es una promesa que tarda la cantidad de milisegundos que se indique en resolverse. Sirve mas que nada en funciones asincronas donde se puede usar el "await" para detener la ejecucion del codigo un rato.
+
+**createOrder(message, database, cantidadMiembros, mensajePedido)**
+
++ message [Message](https://discord.js.org/#/docs/main/stable/class/Message) Mensaje que envio el usuario para crear su pedido.
++ database [database](https://www.npmjs.com/package/mysql#introduction) Conexión directa con la base de datos.
++ cantidadMiembros [Number](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Number) Cantidad de miembros a comprar
++ mensajePedido [String](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/String) El mensaje que usa el usuario para promocionar su servidor.
+
+**addUserOrder(user, inviteCode, database)**
+
++ user [User](https://discord.js.org/#/docs/main/stable/class/User) Usuario que se unio al servidor.
++ inviteCode [String](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/String) Codigo de la invitacion que uso el usuario, si la invitacion no esta asociada a un pedido la funcion no hara nada.
++ database [database](https://www.npmjs.com/package/mysql#introduction) Conexión directa con la base de datos.
+
+Añade un miembro a un pedido de miembros que hay actualmente activo en la base de datos.
+
+**removeUserOrder(user, server, database)**
+
++ user [User](https://discord.js.org/#/docs/main/stable/class/User) Usuario que se fue del servidor.
++ server [Guild](https://discord.js.org/#/docs/main/stable/class/Guild) Servidor donde se realizo el pedido, si no se realizo ningun pedido en el servidor la funcion simplemente no hace nada.
++ database [database](https://www.npmjs.com/package/mysql#introduction) Conexión directa con la base de datos.
+
+Remueve un miembro de un pedido de miembros que hay actualmente activo en la base de datos.
+
+**addCoins(coins, user, historialFragmento, database)**
+
++ coins [Number](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Number) Cantidad de coins a agregar al usuario.
++ user [User](https://discord.js.org/#/docs/main/stable/class/User) Usuario al cual se le agregaran coins.
++ historialFragmento [Object](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Object) Trozo de historial que se le añadira al historial de usuario en la base de datos.
++ database [database](https://www.npmjs.com/package/mysql#introduction) Conexión directa con la base de datos.
+
+Añade coins a un usuario.
+
+**removeCoins(coins, user, historialFragmento, database)**
+
++ coins [Number](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Number) Cantidad de coins a remover al usuario.
++ user [User](https://discord.js.org/#/docs/main/stable/class/User) Usuario al cual se le removeran coins.
++ historialFragmento [Object](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Object) Trozo de historial que se le añadira al historial de usuario en la base de datos.
++ database [database](https://www.npmjs.com/package/mysql#introduction) Conexión directa con la base de datos.
+
+Remueve coins a un usuario. Si el usuario no existia se crea en la base de datos y se le asigna 0 coins y si existia se le retira los coins y puede tener coins negativos.

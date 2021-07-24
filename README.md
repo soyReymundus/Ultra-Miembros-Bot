@@ -2,13 +2,13 @@
 
 Este bot había empezado como un proyecto de github privado y es un bot del estilo "Join 4 Join" que antes discord les aceptaba el formulario de verificación con la condición de que no se pudieran comprar con dinero las monedas del bot para comprar miembros (cosa que todos salteaban poniendo las compras en un web externa). Actualmente anunciaron que este tipo de bots ya no los verificaran y les empezaran a quitar el verificado a los que ya existen.
 
-![f join 4 join](https://media.discordapp.net/attachments/745811541298905158/760827363930931210/unknown.png?width=918&height=560)
+![f join 4 join](https://media.discordapp.net/attachments/745811541298905158/760827363930931210/unknown.png)
 
 Por eso tome la dedición de hacer el código público porque mantener un bot de este tipo sin que genere ninguna ganancia no lo iba a hacer pero pensaba vender el código pero ahora que ya los prohibieron **no pierdo nada al hacer esto.**
 
 ## Consejos
 
-Con respecto al código a quien sea que lea esto no me molesta si lo modifican (aunque no tenga licencia) pueden siempre descargarse el código y modificarlo o usar la función Fork. Mi consejo  es que simplemente estén atentos a cómo funciona por dentro el bot (como registra los comandos, donde van las ids de los administradores del bot, que clase de datos se guardan en la base de datos) recomiendo ver los archivos útil.js y example.js y la primera parte del index.js antes de empezar a modificarlo.
+Con respecto al código no me molesta si lo modifican pueden siempre descargarse el código y modificarlo o usar la función Fork. Mi consejo  es que simplemente estén atentos a cómo funciona por dentro el bot (como registra los comandos, donde van las ids de los administradores del bot, que clase de datos se guardan en la base de datos) recomiendo ver los archivos útil.js y example.js y la primera parte del index.js antes de empezar a modificarlo.
 
 Con respecto a poner el bot en funcionamiento yo quiero aclarar que no me hago responsable de lo que discord le haga a su cuenta. Hasta ahora lo único que se sabe es que no van a verificar bots de este tipo, eso es un obvio problema con el límite de 100 servidores e intentar hacer algo como enviar un formulario con datos falsos es muy peligroso igualmente si decides ignorar mi consejo o mágicamente discord retrocedió con su decisión respecto a los bots J4J aquí dejo las respuestas al formulario de verificación.
 
