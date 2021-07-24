@@ -77,8 +77,7 @@ module.exports.run = (message, args, client, utils, database) => {
                         /**
                          * Servidores en comun con el usuario.
                          */
-                        "mutual_guilds": client.guilds.cache.filter(g =>
-                            g.members.cache.filter(m => m.id === user.id)).toJSON()
+                        "mutual_guilds": client.guilds.cache.filter(g => g.member(user))
                     };
                     /**
                      * Datos del usuario serializados

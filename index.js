@@ -105,7 +105,7 @@ client.on("ready", () => {
      * Array con los estados que usara el bot.
      * @type {String[]}
      */
-    let estados = ["Unete al servidor de soporte discord.gg/FYcVCZN", "Escribe u!hola para empezar a usarme"];
+    let estados = ["Unete al servidor de soporte discord.gg/CODIGO DE INVITACION", "Escribe u!hola para empezar a usarme"];
     /**
      * Cuenta en que pocision del array de estados va.
      * @type {Number}
@@ -228,7 +228,7 @@ client.on("guildMemberAdd", (member) => {
              */
             let invite = guildInvites.find(i => invites_Temp.get(i.code).uses < i.uses);
 
-            //si el sistema fallo y no se unio por ninguna invitacion hacemos un "return" asi no pasa por las condicionales.
+            //si el sistema fallo y/o no se unio por ninguna invitacion hacemos un "return" asi no pasa por las condicionales.
             if (!invite) {
                 return;
             };
